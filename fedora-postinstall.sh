@@ -34,7 +34,7 @@ dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-
 dnf -y install dnf-plugins-core
 
 echo "=== 3. Habilitando Flatpak y repositorio Flathub ==="
-sudo -u $REAL_USER flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 echo "=== 4. Actualizando el sistema base ==="
 dnf -y update
@@ -118,7 +118,7 @@ dnf install -y tailscale steam kdeconnect
 systemctl enable --now tailscaled
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
-sudo -u $REAL_USER flatpak install -y flathub com.discordapp.Discord \
+flatpak install -y flathub com.discordapp.Discord \
                                               com.github.tchx84.Flatseal \
                                               io.github.marcomotta.Warehouse \
                                               io.github.fushandzhiguan.Bazaar \
@@ -126,10 +126,10 @@ sudo -u $REAL_USER flatpak install -y flathub com.discordapp.Discord \
 
 echo "=== 15. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 # Asegurar que exista la carpeta autostart en el espacio de usuario
-sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
+mkdir -p $USER_HOME/.config/autostart
 
 # KDE Connect (Añadir flag para iniciar en segundo plano)
-sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
+cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
 [Desktop Entry]
 Type=Application
 Name=KDE Connect Indicator
@@ -140,7 +140,7 @@ X-GNOME-Autostart-enabled=true
 EOF
 
 # Discord (Minimizado)
-sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
+cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
 [Desktop Entry]
 Type=Application
 Name=Discord
@@ -150,7 +150,7 @@ X-GNOME-Autostart-enabled=true
 EOF
 
 # Telegram (Minimizado)
-sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
+cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
 [Desktop Entry]
 Type=Application
 Name=Telegram
@@ -161,7 +161,7 @@ EOF
 
 echo "=== 16. Limpiando archivos temporales y caché ==="
 dnf clean all
-sudo -u $REAL_USER flatpak uninstall --unused -y
+flatpak uninstall --unused -y
 
 echo "=============================================================================="
 echo " ¡Todo listo! El sistema se ha configurado y limpiado con éxito."
