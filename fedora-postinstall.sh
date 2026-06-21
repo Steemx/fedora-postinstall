@@ -133,7 +133,7 @@ echo "=== 13. Instalando Aplicaciones Flatpak ==="
 # Forzar actualización del mapa de apps de Flathub antes de buscar
 /usr/bin/flatpak update --appstream -y
 
-/usr/bin/flatpak install --system -y --no-progress flathub com.discordapp.Discord \
+env TERM=dumb /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                             com.github.tchx84.Flatseal \
                                             io.github.flattool.Warehouse \
                                             io.github.kolunmi.Bazaar \
