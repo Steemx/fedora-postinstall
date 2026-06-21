@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (DOS FASES CON CONTROL DE RED)
+# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (LXQT INTERACTIVO)
 # ==============================================================================
 
-if [ "$EUID" -ne 0 ]; then
-  echo "Por favor, ejecuta este script usando sudo: sudo $0"
-  exit 1
+# Si se ejecuta la Fase 1, necesitamos sudo obligatoriamente desde el inicio
+if [ ! -f "$HOME/.fedora_postinstall_fase" ]; then
+  if [ "$EUID" -ne 0 ]; then
+    echo "Por favor, ejecuta este script usando sudo: sudo $0"
+    exit 1
+  fi
 fi
 
+# Capturar las rutas correctas del usuario del sistema
 REAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo ~$REAL_USER)
 LOG_FILE="$USER_HOME/fedora_install_report.log"
@@ -25,7 +29,7 @@ log_status() {
 # DETERMINAR EN QUÉ FASE NOS ENCONTRAMOS
 if [ ! -f "$FASE_FILE" ]; then
   # ----------------------------------------------------------------------------
-  # FASE 1: CONFIGURACIÓN BASE DEL SISTEMA Y OPTIMIZACIONES
+  # FASE 1: CONFIGURACIÓN BASE DEL SISTEMA Y OPTIMIZACIONES (Corre como ROOT)
   # ----------------------------------------------------------------------------
   echo "=== INICIANDO FASE 1: Configuración del Sistema Base ==="
   echo "=== REPORTE DE POST-INSTALACIÓN DE FEDORA ===" > "$LOG_FILE"
@@ -40,7 +44,7 @@ installonly_limit=3
 clean_requirements_on_remove=True
 best=False
 skip_if_unavailable=True
-#fastestmirror=True
+fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
 EOF
@@ -111,30 +115,31 @@ options i915 enable_fbc=1
 EOF
   echo "Generando initramfs con Dracut..."
   dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
-  log_status $? "Configuración Intel GuC/HuC y Dracut"
+  log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
-  # Preparar el terreno para que al reiniciar el usuario ejecute la Fase 2
+  # Marcar que vamos a la Fase 2
   echo "2" > "$FASE_FILE"
   chown $REAL_USER:$REAL_USER "$LOG_FILE" "$FASE_FILE"
   
-# Registrar relanzamiento automático en el autostart para la Fase 2
+  # Registrar relanzamiento automático en el autostart de LXQt (Corre como usuario normal)
   sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
   sudo -u $REAL_USER cat << EOF > $USER_HOME/.config/autostart/postinstall_fase2.desktop
 [Desktop Entry]
 Type=Application
 Name=Fedora Postinstall Fase 2
-Exec=qterminal -e "sudo $USER_HOME/fedora-postinstall.sh"
-Terminal=false
+Exec=$USER_HOME/fedora-postinstall.sh
+Terminal=true
 X-GNOME-Autostart-enabled=true
 EOF
 
-  # Copiar el script actual a la carpeta de usuario para que la Fase 2 lo encuentre
+  # Copiar el script a la carpeta de usuario
   cp "$0" $USER_HOME/fedora-postinstall.sh
+  chown $REAL_USER:$REAL_USER $USER_HOME/fedora-postinstall.sh
   chmod +x $USER_HOME/fedora-postinstall.sh
 
   echo "=============================================================================="
   echo " FASE 1 TERMINADA. Se requiere reiniciar el sistema para aplicar los cambios."
-  echo " Al iniciar sesión, se abrirá una terminal automáticamente para la Fase 2."
+  echo " Al iniciar sesión, se abrirá la terminal automáticamente para la Fase 2."
   echo " Reiniciando en 5 segundos..."
   echo "=============================================================================="
   sleep 5
@@ -142,46 +147,47 @@ EOF
 
 else
   # ----------------------------------------------------------------------------
-  # FASE 2: INSTALACIÓN DE SOFTWARE (TRAS EL REINICIO COMPLETO)
+  # FASE 2: INSTALACIÓN DE SOFTWARE (Corre interactivo pidiendo sudo adentro)
   # ----------------------------------------------------------------------------
-  echo "=== INICIANDO FASE 2: Instalación de Software y Limpieza ==="
+  clear
+  echo "================================================================="
+  echo "     INICIANDO FASE 2: Instalación de Software y Limpieza"
+  echo "================================================================="
+  echo "Por favor, introduce tu contraseña para comenzar la instalación:"
   
-  # Eliminar el lanzador de la fase 2 para que no se vuelva a repetir
+  # Forzar la petición de sudo interactiva AQUÍ adentro para mantener las variables vivas
+  sudo -v || exit 1
+
+  # Eliminar el lanzador para que no se repita
   rm -f $USER_HOME/.config/autostart/postinstall_fase2.desktop
 
-  echo "Esperando 10 segundos a que la red esté completamente activa..."
-  sleep 10
-
-  echo "=== 10. Configurando el Firewall (KDE Connect y mDNS) ==="
-  systemctl enable --now firewalld
-  firewall-cmd --permanent --add-service=kdeconnect
-  firewall-cmd --reload
-  log_status $? "Configuración del Firewall"
+  echo "=== 10. Configurando el Firewall (KDE Connect) ==="
+  sudo firewall-cmd --permanent --add-service=kdeconnect
+  sudo firewall-cmd --reload
+  log_status $? "Configuración del Firewall (KDE Connect)"
 
   echo "=== 11. Configurando Temas para Aplicaciones Flatpak ==="
-  flatpak override --system --filesystem=$USER_HOME/.themes
-  flatpak override --system --env=GTK_THEME=my-theme
-  flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
+  sudo flatpak override --system --filesystem=$USER_HOME/.themes
+  sudo flatpak override --system --env=GTK_THEME=my-theme
+  sudo flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
   log_status $? "Overrides de temas para Flatpak"
 
   echo "=== 12. Instalando Programas del Sistema (DNF) ==="
-  dnf config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
-  dnf install -y tailscale steam kdeconnect
-  systemctl enable --now tailscaled
-  log_status $? "Instalación de programas DNF (Tailscale, Steam, KDE Connect)"
+  sudo dnf install -y steam kdeconnect
+  log_status $? "Instalación de programas DNF (Steam, KDE Connect)"
 
   echo "=== 13. Instalando Aplicaciones Flatpak ==="
-  flatpak install -y flathub com.discordapp.Discord \
-                              com.github.tchx84.Flatseal \
-                              io.github.marcomotta.Warehouse \
-                              io.github.fushandzhiguan.Bazaar \
-                              org.telegram.desktop
+  sudo flatpak install -y flathub com.discordapp.Discord \
+                                  com.github.tchx84.Flatseal \
+                                  io.github.marcomotta.Warehouse \
+                                  io.github.fushandzhiguan.Bazaar \
+                                  org.telegram.desktop
   log_status $? "Instalación de aplicaciones Flatpak"
 
   echo "=== 14. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
-  sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
+  mkdir -p $USER_HOME/.config/autostart
 
-  sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
+  cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
 [Desktop Entry]
 Type=Application
 Name=KDE Connect Indicator
@@ -191,7 +197,7 @@ Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
-  sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
+  cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
 [Desktop Entry]
 Type=Application
 Name=Discord
@@ -200,7 +206,7 @@ Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
-  sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
+  cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
 [Desktop Entry]
 Type=Application
 Name=Telegram
@@ -211,22 +217,22 @@ EOF
   log_status $? "Configuración de inicio automático minimizado"
 
   echo "=== 15. Optimizando Tiempos de Arranque Final ==="
-  systemctl disable NetworkManager-wait-online.service
-  systemctl enable fstrim.timer
+  sudo systemctl disable NetworkManager-wait-online.service
+  sudo systemctl enable fstrim.timer
   log_status $? "Optimización de arranque final y fstrim"
 
   echo "=== 16. Limpiando archivos temporales y caché ==="
-  dnf clean all
-  flatpak uninstall --unused -y
+  sudo dnf clean all
+  sudo flatpak uninstall --unused -y
   log_status $? "Limpieza del sistema"
 
-  # Limpieza de archivos de fase
+  # Limpieza de archivos de control
   rm -f "$FASE_FILE"
   rm -f "$USER_HOME/fedora-postinstall.sh"
 
   echo "=== 17. Generando pantalla de reporte final ==="
   SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
-  sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
+  cat << EOF > "$SCRIPT_LOG_VIEWER"
 #!/usr/bin/env bash
 echo "================================================================="
 cat "$LOG_FILE"
@@ -239,7 +245,7 @@ rm -f "$USER_HOME/.config/autostart/show_log.desktop"
 EOF
   chmod +x "$SCRIPT_LOG_VIEWER"
 
-  sudo -u $REAL_USER cat << EOF > $USER_HOME/.config/autostart/show_log.desktop
+  cat << EOF > $USER_HOME/.config/autostart/show_log.desktop
 [Desktop Entry]
 Type=Application
 Name=Show Install Log
@@ -250,7 +256,6 @@ EOF
 
   echo "--------------------------------------------" >> "$LOG_FILE"
   echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
-  chown $REAL_USER:$REAL_USER "$LOG_FILE"
 
   echo "=============================================================================="
   echo " ¡FASE 2 COMPLETADA! El sistema se configuró e instaló por completo."
