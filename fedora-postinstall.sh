@@ -225,6 +225,7 @@ log_status $? "Limpieza del sistema"
 
 echo "=== 18. Generando pantalla de reporte para el próximo inicio ==="
 /usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
+
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
 sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
 #!/usr/bin/env bash
@@ -247,6 +248,19 @@ Exec=qterminal -e "/usr/bin/bash -c '$SCRIPT_LOG_VIEWER'"
 Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
+
+# --- COMPROBACIONES DE HARDWARE (MUESTRAN EL ESTADO REAL EN EL LOG) ---
+echo "=== Comprobaciones de Hardware Post-Instalación ===" >> "$LOG_FILE"
+
+echo -e "\n[Estado de Intel GuC]:" >> "$LOG_FILE"
+/usr/bin/dmesg | grep -i guc >> "$LOG_FILE" 2>&1 || echo "No se encontraron registros de GuC" >> "$LOG_FILE"
+
+echo -e "\n[Estado de Intel HuC]:" >> "$LOG_FILE"
+/usr/bin/dmesg | grep -i huc >> "$LOG_FILE" 2>&1 || echo "No se encontraron registros de HuC" >> "$LOG_FILE"
+
+echo -e "\n[Estado de zRAMctl]:" >> "$LOG_FILE"
+/usr/bin/zramctl >> "$LOG_FILE" 2>&1 || echo "No se pudo ejecutar zramctl" >> "$LOG_FILE"
+# ----------------------------------------------------------------------
 
 echo "--------------------------------------------" >> "$LOG_FILE"
 echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
