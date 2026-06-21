@@ -108,6 +108,7 @@ echo "=== 9. Habilitando GuC/HuC para Gráficos Intel ==="
 cat << 'EOF' > /etc/modprobe.d/i915.conf
 options i915 enable_guc=3
 options i915 enable_fbc=1
+options i915 modeset=1
 EOF
 echo "Generando initramfs con Dracut..."
 /usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
@@ -123,11 +124,11 @@ else
 fi
 log_status $? "Eliminación completa y bloqueo de firewalld"
 
-echo "=== 11. Instalando Labwc y Teclado Latam (Miriway Intacto) ==="
-# 1. Instalar el compositor Labwc y la sesión de Wayland (usando sintaxis limpia DNF5)
+echo "=== 11. Instalando Labwc y Teclado Latam ==="
+# 1. Instalar el compositor Labwc y la sesión de Wayland
 /usr/bin/dnf install -y labwc lxqt-wayland-session
 
-# 2. Configurar el teclado latinoamericano de forma global nativa
+# 2. Configurar el teclado latinoamericano de forma global nativa (Evitando duplicados)
 if [ -f /etc/environment ]; then
     sed -i '/XKB_DEFAULT_LAYOUT/d' /etc/environment
     sed -i '/XKB_DEFAULT_MODEL/d' /etc/environment
@@ -154,19 +155,39 @@ log_status $? "Instalación de Labwc y configuración de teclado Latam"
 
 echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
-/usr/bin/flatpak override --system --env=GTK_THEME=numix
+# CORREGIDO: "Numix" con N mayúscula para coincidir exactamente con el nombre de la carpeta del sistema
+/usr/bin/flatpak override --system --env=GTK_THEME=Numix
 /usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
 log_status $? "Overrides de temas para Flatpak"
 
-echo "=== 13. Instalando Programas del Sistema (DNF) ==="
+echo "=== 13. Configurando Soporte Completo para Bluetooth ==="
+# 1. Instalar servicio de Bluetooth y la bandeja del sistema (Blueman)
+/usr/bin/dnf install -y bluez bluez-utils blueman
+# 2. Habilitar y arrancar el servicio nativo
+/usr/bin/systemctl enable bluetooth.service
+/usr/bin/systemctl start bluetooth.service
+# 3. Lanzamiento automático en el inicio del entorno
+sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
+sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/blueman-applet.desktop
+[Desktop Entry]
+Type=Application
+Name=Blueman Applet
+Icon=blueman
+Exec=blueman-applet
+Terminal=false
+Categories=Network;HardwareSettings;
+EOF
+log_status $? "Configuración e inicio automático de Bluetooth (Blueman)"
+
+echo "=== 14. Instalando Programas del Sistema (DNF) ==="
 /usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox labwc-tweaks kvantum numix-gtk-theme numix-icon-theme
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox. Labwc-tweaks, Kvantum, Numix Theme)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox, Labwc-tweaks, Kvantum, Numix Theme)"
 else
   log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox, Labwc-tweaks, Kvantum, Numix Theme)"
 fi
 
-echo "=== 14. Instalando Aplicaciones Flatpak ==="
+echo "=== 15. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
 env TERM=dumb /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                                               com.github.tchx84.Flatseal \
@@ -179,7 +200,7 @@ else
   log_status 1 "Instalación de aplicaciones Flatpak"
 fi
 
-echo "=== 15. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
+echo "=== 16. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
@@ -213,17 +234,17 @@ Categories=Network;InstantMessaging;
 EOF
 log_status $? "Configuración de inicio automático minimizado"
 
-echo "=== 16. Optimizando Tiempos de Arranque Final ==="
+echo "=== 17. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
 /usr/bin/systemctl enable fstrim.timer
 log_status $? "Optimización de arranque final y fstrim"
 
-echo "=== 17. Limpiando archivos temporales y caché ==="
+echo "=== 18. Limpiando archivos temporales y caché ==="
 /usr/bin/dnf clean all
 /usr/bin/flatpak uninstall --unused -y
 log_status $? "Limpieza del sistema"
 
-echo "=== 18. Generando pantalla de reporte para el próximo inicio ==="
+echo "=== 19. Generando pantalla de reporte para el próximo inicio ==="
 /usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
 
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
@@ -272,4 +293,5 @@ echo " El equipo se reiniciará automáticamente en 10 segundos para que leas...
 echo " Al volver, cambia la sesión a 'LXQt (Wayland)' o Labwc si aparece."
 echo "=============================================================================="
 sleep 10
-/usr/sbin/reboot
+# CORREGIDO: Uso de reboot nativo e interactivo con systemd
+reboot
