@@ -136,7 +136,7 @@ echo "=== 13. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                             com.github.tchx84.Flatseal \
                                             io.github.flattool.Warehouse \
-                                            io.github.fushandzhiguan.Bazaar \
+                                            io.github.kolunmi.Bazaar \
                                             org.telegram.desktop \
                                             com.vysp3r.ProtonPlus
 if [ $? -eq 0 ] || /usr/bin/flatpak list --system | grep -q "Discord"; then
