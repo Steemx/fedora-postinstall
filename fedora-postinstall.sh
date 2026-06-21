@@ -142,13 +142,15 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
-# Ajuste específico en el config de Miriway
+# Ajuste específico en el config de Miriway (CORREGIDO: Entrada limpia sin >> suelto)
 MIRIWAY_CONFIG="$USER_HOME/.config/miriway-shell.config"
 sudo -u $REAL_USER mkdir -p "$(dirname "$MIRIWAY_CONFIG")"
 if [ -f "$MIRIWAY_CONFIG" ]; then
     sudo -u $REAL_USER sed -i '/app-env-amend=/d' "$MIRIWAY_CONFIG"
 fi
-sudo -u $REAL_USER echo "app-env-amend=XKB_DEFAULT_LAYOUT=latam:XKB_DEFAULT_MODEL=pc105" >> "$MIRIWAY_CONFIG"
+sudo -u $REAL_USER cat << 'EOF' >> "$MIRIWAY_CONFIG"
+app-env-amend=XKB_DEFAULT_LAYOUT=latam:XKB_DEFAULT_MODEL=pc105
+EOF
 
 # Script de pre-arranque forzado de LXQt (Bala de plata)
 PRE_START_SCRIPT="$USER_HOME/.config/lxqt/session-pre-start.sh"
@@ -269,5 +271,7 @@ echo " ¡PROCESO COMPLETADO! Todo se ha configurado e instalado con éxito."
 echo " El equipo se reiniciará automáticamente en 5 segundos..."
 echo " Al iniciar sesión tu teclado estará en Latinoamericano y apps activas."
 echo "=============================================================================="
-sleep 5
+sleep 10
 /usr/sbin/reboot
+
+
