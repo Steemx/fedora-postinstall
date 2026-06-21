@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (UNIFICADO - LXQT OPTIMIZADO)
+# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (UNIFICADO - LXQT + LABWC)
 # ==============================================================================
 
 # Asegurar que el script se ejecute como root al principio
@@ -36,7 +36,7 @@ installonly_limit=3
 clean_requirements_on_remove=True
 best=False
 skip_if_unavailable=True
-#fastestmirror=True
+fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
 EOF
@@ -48,7 +48,7 @@ echo "=== 2. Instalando Repositorios RPM Fusion y Plugins ==="
 /usr/bin/dnf -y install dnf-plugins-core
 log_status $? "Repositorios RPM Fusion y Plugins"
 
-echo "=== 3. Habilitando Flatpak y repositorio Flathub ==="
+echo "=== 3. Habilitando Flatpak and repositorio Flathub ==="
 /usr/bin/flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 log_status $? "Repositorio Flathub"
 
@@ -109,32 +109,39 @@ echo "Generando initramfs con Dracut..."
 /usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
-echo "=== 10. Eliminando el Firewall (Firewalld) ==="
-# Detener el servicio de inmediato
+echo "=== 10. Eliminando por completo el Firewall (Firewalld) ==="
+# Detener de inmediato y desinstalar
 /usr/bin/systemctl stop firewalld.service 2>/dev/null || true
-# Remover el paquete
 /usr/bin/dnf remove -y firewalld
-
-# Excluir firewalld de futuras instalaciones automáticas en el dnf.conf
+# Bloquear firewalld en DNF para que ninguna dependencia (como kde-connect) lo reinstale
 if ! grep -q "exclude=" /etc/dnf/dnf.conf; then
   echo "exclude=firewalld" >> /etc/dnf/dnf.conf
 else
   sed -i 's/exclude=/exclude=firewalld,/g' /etc/dnf/dnf.conf
 fi
-log_status $? "Eliminación completa y bloqueo de firewalld en DNF"
+log_status $? "Eliminación completa y bloqueo de firewalld"
 
-echo "=== 11. Configuración de Teclado (LXQt + Miriway) ==="
-# Ajuste en la sesión nativa de LXQt (Esto fuerza el entorno antes de Miriway)
+echo "=== 11. Instalando Labwc y Configurando Teclado (Adiós Miriway) ==="
+# 1. Instalar Labwc (El compositor Wayland rápido y estable para LXQt)
+/usr/bin/dnf install -y labwc
+
+# 2. Configurar el teclado latinoamericano de forma global nativa
+if [ -f /etc/environment ]; then
+    sed -i '/XKB_DEFAULT_LAYOUT/d' /etc/environment
+    sed -i '/XKB_DEFAULT_MODEL/d' /etc/environment
+fi
+cat << 'EOF' >> /etc/environment
+XKB_DEFAULT_LAYOUT=latam
+XKB_DEFAULT_MODEL=pc105
+EOF
+
+# 3. Forzar el entorno en la sesión nativa de LXQt por seguridad
 LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
 sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
-
 if [ -f "$LXQT_SESSION_CONF" ]; then
     sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
     sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
-    sudo -u $REAL_USER sed -i '/\[Environment\]/d' "$LXQT_SESSION_CONF" 2>/dev/null || true
 fi
-
-# Inyectamos de forma nativa la sección Environment en el config de LXQt
 sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
 
 [Environment]
@@ -142,27 +149,9 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
-# Ajuste específico en el config de Miriway (CORREGIDO: Entrada limpia sin >> suelto)
-MIRIWAY_CONFIG="$USER_HOME/.config/miriway-shell.config"
-sudo -u $REAL_USER mkdir -p "$(dirname "$MIRIWAY_CONFIG")"
-if [ -f "$MIRIWAY_CONFIG" ]; then
-    sudo -u $REAL_USER sed -i '/app-env-amend=/d' "$MIRIWAY_CONFIG"
-fi
-sudo -u $REAL_USER cat << 'EOF' >> "$MIRIWAY_CONFIG"
-app-env-amend=XKB_DEFAULT_LAYOUT=latam:XKB_DEFAULT_MODEL=pc105
-EOF
-
-# Script de pre-arranque forzado de LXQt (Bala de plata)
-PRE_START_SCRIPT="$USER_HOME/.config/lxqt/session-pre-start.sh"
-sudo -u $REAL_USER cat << 'EOF' > "$PRE_START_SCRIPT"
-#!/usr/bin/env bash
-export XKB_DEFAULT_LAYOUT=latam
-export XKB_DEFAULT_MODEL=pc105
-EOF
-chmod +x "$PRE_START_SCRIPT"
-chown $REAL_USER:$REAL_USER "$PRE_START_SCRIPT"
-
-log_status 0 "Configuración masiva de teclado latinoamericano para LXQt-Miriway"
+# 4. Remover Miriway para limpiar el sistema y evitar confusiones en el login
+/usr/bin/dnf remove -y miriway xdg-desktop-portal-wlr
+log_status $? "Instalación de Labwc, eliminación de Miriway y teclado Latam"
 
 echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
@@ -170,18 +159,18 @@ echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
 log_status $? "Overrides de temas para Flatpak"
 
-echo "=== 13. Instalando Programas del Sistema (DNF) ===" 
-# Instalamos ignorando dependencias débiles recomendadas 
-/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect 
-if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then 
-log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" 
-else 
-log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" 
+echo "=== 13. Instalando Programas del Sistema (DNF) ==="
+# Se añade el flag para ignorar dependencias débiles y blindar la ausencia de firewalld
+/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect
+if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect)"
+else
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect)"
 fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
-# Usamos env TERM=dumb para ocultar barras de progreso animadas y evitar caracteres ANSI corruptos
+# Ocultar barras de progreso animadas rotas usando env TERM=dumb
 env TERM=dumb /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                                               com.github.tchx84.Flatseal \
                                                               io.github.flattool.Warehouse \
@@ -267,11 +256,9 @@ echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
 /usr/bin/chown $REAL_USER:$REAL_USER "$LOG_FILE"
 
 echo "=============================================================================="
-echo " ¡PROCESO COMPLETADO! Todo se ha configurado e instalado con éxito."
+echo " ¡PROCESO COMPLETADO! Todo se ha configurado de manera definitiva."
 echo " El equipo se reiniciará automáticamente en 5 segundos..."
-echo " Al iniciar sesión tu teclado estará en Latinoamericano y apps activas."
+echo " Recuerda seleccionar 'LXQt (Labwc)' en tu pantalla de login si es necesario."
 echo "=============================================================================="
-sleep 10
+sleep 5
 /usr/sbin/reboot
-
-
