@@ -112,9 +112,16 @@ log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 echo "=== 10. Eliminando el Firewall (Firewalld) ==="
 # Detener el servicio de inmediato
 /usr/bin/systemctl stop firewalld.service 2>/dev/null || true
-# Deshabilitar y remover el paquete del sistema
+# Remover el paquete
 /usr/bin/dnf remove -y firewalld
-log_status $? "Eliminación completa de firewalld"
+
+# Excluir firewalld de futuras instalaciones automáticas en el dnf.conf
+if ! grep -q "exclude=" /etc/dnf/dnf.conf; then
+  echo "exclude=firewalld" >> /etc/dnf/dnf.conf
+else
+  sed -i 's/exclude=/exclude=firewalld,/g' /etc/dnf/dnf.conf
+fi
+log_status $? "Eliminación completa y bloqueo de firewalld en DNF"
 
 echo "=== 11. Detección Inteligente y Configuración de Teclado (LXQt + Miriway) ==="
 CURRENT_DESKTOP=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:lower:]' '[:upper:]')
@@ -181,13 +188,9 @@ echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
 log_status $? "Overrides de temas para Flatpak"
 
-echo "=== 13. Instalando Programas del Sistema (DNF) ==="
-/usr/bin/dnf install -y steam kde-connect firefox
-if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
-else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
-fi
+echo "=== 13. Instalando Programas del Sistema (DNF) ===" 
+# Instalamos ignorando dependencias débiles recomendadas 
+/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" else log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
