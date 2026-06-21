@@ -65,19 +65,21 @@ echo "=== 6. Instalando fuentes del sistema ==="
 log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
-# 1. Preparar repositorios multimedia y códecs de audio externos
-/usr/bin/dnf install -y libfreeaptx libldac fdk-aac
+# 1. Resolver el conflicto principal de ffmpeg reemplazando la versión libre por la de RPM Fusion
+/usr/bin/dnf swap -y ffmpeg-free ffmpeg --allowerasing
 
-# 2. Instalación del grupo multimedia con la sintaxis nativa de DNF5
-/usr/bin/dnf group install -y "Sound and Video" --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
+# 2. Instalar librerías complementarias de audio y códecs externos
+/usr/bin/dnf install -y libfreeaptx libldac fdk-aac ffmpeg-libs libva libva-utils
 
-# 3. Instalación de librerías de video y OpenH264
-/usr/bin/dnf install -y ffmpeg ffmpeg-libs libva libva-utils openh264 gstreamer1-plugin-openh264 mozilla-openh264
+# 3. Instalación/Actualización del grupo multimedia usando la sintaxis nativa de DNF5
+/usr/bin/dnf group upgrade -y "Sound and Video" --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin --allowerasing
+
+# 4. Configurar OpenH264 y drivers de video nativos con aceleración completa para Intel Celeron N4020
+/usr/bin/dnf install -y gstreamer1-plugin-openh264 mozilla-openh264
 /usr/bin/dnf config-manager setopt fedora-cisco-openh264.enabled=1
-
-# 4. Driver de video nativo para Intel Celeron N4020 (Gemini Lake)
 /usr/bin/dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing
-log_status $? "Códecs multimedia y drivers de video Intel"
+
+log_status $? "Códecs multimedia y drivers de video Intel (RPM Fusion)"
 
 echo "=== 8. Ajustes de Rendimiento Avanzados (ZRAM y sysctl) ==="
 cat << 'EOF' > /etc/sysctl.d/99-zram-tune.conf
