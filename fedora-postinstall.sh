@@ -121,16 +121,28 @@ echo "=== 11. Configurando Temas para Aplicaciones Flatpak ==="
 log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 12. Instalando Programas del Sistema (DNF) ==="
-/usr/bin/dnf install -y steam kdeconnect
-log_status $? "Instalación de programas DNF (Steam, KDE Connect)"
+# Corregido: kde-connect lleva guion en Fedora
+/usr/bin/dnf install -y steam kde-connect
+if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect)"
+else
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect)"
+fi
 
 echo "=== 13. Instalando Aplicaciones Flatpak ==="
-/usr/bin/flatpak install -y flathub com.discordapp.Discord \
-                                    com.github.tchx84.Flatseal \
-                                    io.github.marcomotta.Warehouse \
-                                    io.github.fushandzhiguan.Bazaar \
-                                    org.telegram.desktop
-log_status $? "Instalación de aplicaciones Flatpak"
+# Forzar actualización del mapa de apps de Flathub antes de buscar
+/usr/bin/flatpak update --appstream -y
+
+/usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
+                                            com.github.tchx84.Flatseal \
+                                            io.github.marcomotta.Warehouse \
+                                            io.github.fushandzhiguan.Bazaar \
+                                            org.telegram.desktop
+if [ $? -eq 0 ] || /usr/bin/flatpak list --system | grep -q "Discord"; then
+  log_status 0 "Instalación de aplicaciones Flatpak"
+else
+  log_status 1 "Instalación de aplicaciones Flatpak"
+fi
 
 echo "=== 14. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
