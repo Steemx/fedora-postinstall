@@ -122,11 +122,11 @@ log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 12. Instalando Programas del Sistema (DNF) ==="
 # Corregido: kde-connect lleva guion en Fedora
-/usr/bin/dnf install -y steam kde-connect
+/usr/bin/dnf install -y steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect)"
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 fi
 
 echo "=== 13. Instalando Aplicaciones Flatpak ==="
@@ -135,7 +135,7 @@ echo "=== 13. Instalando Aplicaciones Flatpak ==="
 
 /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                             com.github.tchx84.Flatseal \
-                                            io.github.marcomotta.Warehouse \
+                                            io.github.flattool.Warehouse \
                                             io.github.fushandzhiguan.Bazaar \
                                             org.telegram.desktop
 if [ $? -eq 0 ] || /usr/bin/flatpak list --system | grep -q "Discord"; then
