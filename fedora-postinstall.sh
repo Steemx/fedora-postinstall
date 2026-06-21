@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (LXQT INTERACTIVO)
+# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (OPTIMIZADO PARA SUDO NOPASSWD)
 # ==============================================================================
 
-# Si se ejecuta la Fase 1, necesitamos sudo obligatoriamente desde el inicio
-if [ ! -f "$HOME/.fedora_postinstall_fase" ]; then
-  if [ "$EUID" -ne 0 ]; then
-    echo "Por favor, ejecuta este script usando sudo: sudo $0"
-    exit 1
-  fi
+if [ "$EUID" -ne 0 ]; then
+  echo "Por favor, ejecuta este script usando sudo: sudo $0"
+  exit 1
 fi
 
-# Capturar las rutas correctas del usuario del sistema
 REAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo ~$REAL_USER)
 LOG_FILE="$USER_HOME/fedora_install_report.log"
@@ -29,7 +25,7 @@ log_status() {
 # DETERMINAR EN QUÉ FASE NOS ENCONTRAMOS
 if [ ! -f "$FASE_FILE" ]; then
   # ----------------------------------------------------------------------------
-  # FASE 1: CONFIGURACIÓN BASE DEL SISTEMA Y OPTIMIZACIONES (Corre como ROOT)
+  # FASE 1: CONFIGURACIÓN BASE DEL SISTEMA Y OPTIMIZACIONES
   # ----------------------------------------------------------------------------
   echo "=== INICIANDO FASE 1: Configuración del Sistema Base ==="
   echo "=== REPORTE DE POST-INSTALACIÓN DE FEDORA ===" > "$LOG_FILE"
@@ -121,14 +117,14 @@ EOF
   echo "2" > "$FASE_FILE"
   chown $REAL_USER:$REAL_USER "$LOG_FILE" "$FASE_FILE"
   
-  # Registrar relanzamiento automático en el autostart de LXQt (Corre como usuario normal)
+  # Registrar relanzamiento automático en el autostart de LXQt (Forzamos bash para mantener vivo el proceso)
   sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
   sudo -u $REAL_USER cat << EOF > $USER_HOME/.config/autostart/postinstall_fase2.desktop
 [Desktop Entry]
 Type=Application
 Name=Fedora Postinstall Fase 2
-Exec=$USER_HOME/fedora-postinstall.sh
-Terminal=true
+Exec=qterminal -e "sudo $USER_HOME/fedora-postinstall.sh"
+Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
@@ -139,7 +135,7 @@ EOF
 
   echo "=============================================================================="
   echo " FASE 1 TERMINADA. Se requiere reiniciar el sistema para aplicar los cambios."
-  echo " Al iniciar sesión, se abrirá la terminal automáticamente para la Fase 2."
+  echo " Al iniciar sesión, se abrirá QTerminal automáticamente para la Fase 2."
   echo " Reiniciando en 5 segundos..."
   echo "=============================================================================="
   sleep 5
@@ -147,47 +143,43 @@ EOF
 
 else
   # ----------------------------------------------------------------------------
-  # FASE 2: INSTALACIÓN DE SOFTWARE (Corre interactivo pidiendo sudo adentro)
+  # FASE 2: INSTALACIÓN DE SOFTWARE (Ejecución Directa como Root por NOPASSWD)
   # ----------------------------------------------------------------------------
   clear
   echo "================================================================="
   echo "     INICIANDO FASE 2: Instalación de Software y Limpieza"
   echo "================================================================="
-  echo "Por favor, introduce tu contraseña para comenzar la instalación:"
   
-  # Forzar la petición de sudo interactiva AQUÍ adentro para mantener las variables vivas
-  sudo -v || exit 1
-
   # Eliminar el lanzador para que no se repita
   rm -f $USER_HOME/.config/autostart/postinstall_fase2.desktop
 
   echo "=== 10. Configurando el Firewall (KDE Connect) ==="
-  sudo firewall-cmd --permanent --add-service=kdeconnect
-  sudo firewall-cmd --reload
+  firewall-cmd --permanent --add-service=kdeconnect
+  firewall-cmd --reload
   log_status $? "Configuración del Firewall (KDE Connect)"
 
   echo "=== 11. Configurando Temas para Aplicaciones Flatpak ==="
-  sudo flatpak override --system --filesystem=$USER_HOME/.themes
-  sudo flatpak override --system --env=GTK_THEME=my-theme
-  sudo flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
+  flatpak override --system --filesystem=$USER_HOME/.themes
+  flatpak override --system --env=GTK_THEME=my-theme
+  flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
   log_status $? "Overrides de temas para Flatpak"
 
   echo "=== 12. Instalando Programas del Sistema (DNF) ==="
-  sudo dnf install -y steam kdeconnect
+  dnf install -y steam kdeconnect
   log_status $? "Instalación de programas DNF (Steam, KDE Connect)"
 
   echo "=== 13. Instalando Aplicaciones Flatpak ==="
-  sudo flatpak install -y flathub com.discordapp.Discord \
-                                  com.github.tchx84.Flatseal \
-                                  io.github.marcomotta.Warehouse \
-                                  io.github.fushandzhiguan.Bazaar \
-                                  org.telegram.desktop
+  flatpak install -y flathub com.discordapp.Discord \
+                              com.github.tchx84.Flatseal \
+                              io.github.marcomotta.Warehouse \
+                              io.github.fushandzhiguan.Bazaar \
+                              org.telegram.desktop
   log_status $? "Instalación de aplicaciones Flatpak"
 
   echo "=== 14. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
-  mkdir -p $USER_HOME/.config/autostart
+  sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 
-  cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
+  sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
 [Desktop Entry]
 Type=Application
 Name=KDE Connect Indicator
@@ -197,7 +189,7 @@ Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
-  cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
+  sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
 [Desktop Entry]
 Type=Application
 Name=Discord
@@ -206,7 +198,7 @@ Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
-  cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
+  sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
 [Desktop Entry]
 Type=Application
 Name=Telegram
@@ -217,22 +209,22 @@ EOF
   log_status $? "Configuración de inicio automático minimizado"
 
   echo "=== 15. Optimizando Tiempos de Arranque Final ==="
-  sudo systemctl disable NetworkManager-wait-online.service
-  sudo systemctl enable fstrim.timer
+  systemctl disable NetworkManager-wait-online.service
+  systemctl enable fstrim.timer
   log_status $? "Optimización de arranque final y fstrim"
 
   echo "=== 16. Limpiando archivos temporales y caché ==="
-  sudo dnf clean all
-  sudo flatpak uninstall --unused -y
+  dnf clean all
+  flatpak uninstall --unused -y
   log_status $? "Limpieza del sistema"
 
-  # Limpieza de archivos de control
+  # Limpieza de archivos de control de fase
   rm -f "$FASE_FILE"
   rm -f "$USER_HOME/fedora-postinstall.sh"
 
   echo "=== 17. Generando pantalla de reporte final ==="
   SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
-  cat << EOF > "$SCRIPT_LOG_VIEWER"
+  sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
 #!/usr/bin/env bash
 echo "================================================================="
 cat "$LOG_FILE"
@@ -245,17 +237,18 @@ rm -f "$USER_HOME/.config/autostart/show_log.desktop"
 EOF
   chmod +x "$SCRIPT_LOG_VIEWER"
 
-  cat << EOF > $USER_HOME/.config/autostart/show_log.desktop
+  sudo -u $REAL_USER cat << EOF > $USER_HOME/.config/autostart/show_log.desktop
 [Desktop Entry]
 Type=Application
 Name=Show Install Log
-Exec=$SCRIPT_LOG_VIEWER
-Terminal=true
+Exec=qterminal -e "$SCRIPT_LOG_VIEWER"
+Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
   echo "--------------------------------------------" >> "$LOG_FILE"
   echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
+  chown $REAL_USER:$REAL_USER "$LOG_FILE"
 
   echo "=============================================================================="
   echo " ¡FASE 2 COMPLETADA! El sistema se configuró e instaló por completo."
