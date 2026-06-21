@@ -170,7 +170,12 @@ log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 13. Instalando Programas del Sistema (DNF) ===" 
 # Instalamos ignorando dependencias débiles recomendadas 
-/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" else log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" fi
+/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect 
+if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then 
+log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" 
+else 
+log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)" 
+fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
