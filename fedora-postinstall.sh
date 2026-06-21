@@ -36,7 +36,7 @@ installonly_limit=3
 clean_requirements_on_remove=True
 best=False
 skip_if_unavailable=True
-#fastestmirror=True
+fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
 EOF
@@ -114,41 +114,62 @@ echo "=== 10. Configurando el Firewall (KDE Connect) ==="
 /usr/bin/firewall-cmd --reload
 log_status $? "Configuración del Firewall (KDE Connect)"
 
-echo "=== 11. Configurando Temas para Aplicaciones Flatpak ==="
+echo "=== 11. Detección Inteligente y Configuración de Teclado (LXQt + Miriway) ==="
+CURRENT_DESKTOP=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:lower:]' '[:upper:]')
+SESSION_TYPE=$(echo "$XDG_SESSION_TYPE" | tr '[:lower:]' '[:upper:]')
+
+if [[ "$CURRENT_DESKTOP" == *"LXQT"* && ("$SESSION_TYPE" == *"WAYLAND"* || -f /usr/bin/miriway || -d /etc/xdg/xdg-miriway) ]]; then
+    echo "Entorno LXQt con Wayland/Miriway detectado. Configurando teclado latinoamericano..."
+    if [ -f /etc/environment ]; then
+        sed -i '/XKB_DEFAULT_LAYOUT/d' /etc/environment
+        sed -i '/XKB_DEFAULT_MODEL/d' /etc/environment
+    fi
+    echo "XKB_DEFAULT_LAYOUT=latam" >> /etc/environment
+    echo "XKB_DEFAULT_MODEL=pc105" >> /etc/environment
+
+    MIRIWAY_CONFIG="$USER_HOME/.config/miriway-shell.config"
+    sudo -u $REAL_USER mkdir -p "$(dirname "$MIRIWAY_CONFIG")"
+    if [ -f "$MIRIWAY_CONFIG" ]; then
+        sudo -u $REAL_USER sed -i '/app-env-amend=/d' "$MIRIWAY_CONFIG"
+    fi
+    sudo -u $REAL_USER echo "app-env-amend=XKB_DEFAULT_LAYOUT=latam:XKB_DEFAULT_MODEL=pc105" >> "$MIRIWAY_CONFIG"
+    log_status 0 "Configuración de teclado latinoamericano para LXQt-Miriway"
+else
+    echo "Entorno diferente detectado, saltando inyección de teclado latinoamericano."
+    log_status 0 "Teclado latinoamericano (Saltado - No requerido)"
+fi
+
+echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
 /usr/bin/flatpak override --system --env=GTK_THEME=my-theme
 /usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
 log_status $? "Overrides de temas para Flatpak"
 
-echo "=== 12. Instalando Programas del Sistema (DNF) ==="
-# Corregido: kde-connect lleva guion en Fedora
-/usr/bin/dnf install -y steam kde-connect firefox
+echo "=== 13. Instalando Programas del Sistema (DNF) ==="
+/usr/bin/dnf install -y steam kde-connect
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect)"
 else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect)"
 fi
 
-echo "=== 13. Instalando Aplicaciones Flatpak ==="
-# Forzar actualización del mapa de apps de Flathub antes de buscar
+echo "=== 14. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
-
+# Usamos env TERM=dumb para ocultar barras de progreso animadas y evitar caracteres ANSI corruptos
 env TERM=dumb /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
-                                            com.github.tchx84.Flatseal \
-                                            io.github.flattool.Warehouse \
-                                            io.github.kolunmi.Bazaar \
-                                            org.telegram.desktop \
-                                            com.vysp3r.ProtonPlus
+                                                              com.github.tchx84.Flatseal \
+                                                              io.github.flattool.Warehouse \
+                                                              org.telegram.desktop \
+                                                              io.github.kolunmi.Bazaar 2>&1 | grep -v -E "([0-9]+%)"
 if [ $? -eq 0 ] || /usr/bin/flatpak list --system | grep -q "Discord"; then
   log_status 0 "Instalación de aplicaciones Flatpak"
 else
   log_status 1 "Instalación de aplicaciones Flatpak"
 fi
 
-echo "=== 14. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
+echo "=== 15. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 
-# 14a. KDE Connect (Usando el indicador nativo)
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
 [Desktop Entry]
 Type=Application
@@ -159,7 +180,6 @@ Terminal=false
 Categories=Network;
 EOF
 
-# 14b. Discord Flatpak (Minimizado y compatible con LXQt)
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
 [Desktop Entry]
 Type=Application
@@ -170,7 +190,6 @@ Terminal=false
 Categories=Network;InstantMessaging;
 EOF
 
-# 14c. Telegram Flatpak (En bandeja y compatible con LXQt)
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
 [Desktop Entry]
 Type=Application
@@ -182,17 +201,18 @@ Categories=Network;InstantMessaging;
 EOF
 log_status $? "Configuración de inicio automático minimizado"
 
-echo "=== 15. Optimizando Tiempos de Arranque Final ==="
+echo "=== 16. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
 /usr/bin/systemctl enable fstrim.timer
 log_status $? "Optimización de arranque final y fstrim"
 
-echo "=== 16. Limpiando archivos temporales y caché ==="
+echo "=== 17. Limpiando archivos temporales y caché ==="
 /usr/bin/dnf clean all
 /usr/bin/flatpak uninstall --unused -y
 log_status $? "Limpieza del sistema"
 
-echo "=== 17. Generando pantalla de reporte para el próximo inicio ==="
+echo "=== 18. Generando pantalla de reporte para el próximo inicio ==="
+/usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
 sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
 #!/usr/bin/env bash
@@ -221,9 +241,9 @@ echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
 /usr/bin/chown $REAL_USER:$REAL_USER "$LOG_FILE"
 
 echo "=============================================================================="
-echo " ¡PROCESO COMPLETADO! Todo se ha instalado de un solo tirón."
+echo " ¡PROCESO COMPLETADO! Todo se ha configurado e instalado con éxito."
 echo " El equipo se reiniciará automáticamente en 5 segundos..."
-echo " Al iniciar sesión verás la ventana con el log de verificación."
+echo " Al iniciar sesión tu teclado estará en Latinoamericano y apps activas."
 echo "=============================================================================="
 sleep 5
 /usr/sbin/reboot
