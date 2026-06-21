@@ -123,13 +123,17 @@ SESSION_TYPE=$(echo "$XDG_SESSION_TYPE" | tr '[:lower:]' '[:upper:]')
 if [[ "$CURRENT_DESKTOP" == *"LXQT"* && ("$SESSION_TYPE" == *"WAYLAND"* || -f /usr/bin/miriway || -d /etc/xdg/xdg-miriway) ]]; then
     echo "Entorno LXQt con Wayland/Miriway detectado. Forzando teclado latinoamericano..."
     
-    # 1. Ajuste global del sistema usando TEE (Sudo real para escribir en /etc/)
+    # 1. Ajuste global del sistema usando bloques CAT nativos (A prueba de fallos de tuberías)
     if [ -f /etc/environment ]; then
         sed -i '/XKB_DEFAULT_LAYOUT/d' /etc/environment
         sed -i '/XKB_DEFAULT_MODEL/d' /etc/environment
     fi
-    echo "XKB_DEFAULT_LAYOUT=latam" | tee -a /etc/environment > /dev/null
-    echo "XKB_DEFAULT_MODEL=pc105" | tee -a /etc/environment > /dev/null
+    
+    # Inyección directa sin tuberías ni eco
+    cat << 'EOF' >> /etc/environment
+XKB_DEFAULT_LAYOUT=latam
+XKB_DEFAULT_MODEL=pc105
+EOF
 
     # 2. Ajuste específico en el config de Miriway
     MIRIWAY_CONFIG="$USER_HOME/.config/miriway-shell.config"
