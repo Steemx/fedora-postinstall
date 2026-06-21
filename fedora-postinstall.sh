@@ -154,16 +154,16 @@ log_status $? "Instalación de Labwc y configuración de teclado Latam"
 
 echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
-/usr/bin/flatpak override --system --env=GTK_THEME=kvantum
+/usr/bin/flatpak override --system --env=GTK_THEME=numix
 /usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
 log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 13. Instalando Programas del Sistema (DNF) ==="
-/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox labwc-tweaks kvantum
+/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox labwc-tweaks kvantum numix-gtk-theme numix-icon-theme
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox. Labwc-tweaks, Kvantum)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox. Labwc-tweaks, Kvantum, Numix Theme)"
 else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox, Labwc-tweaks, Kvantum)"
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox, Labwc-tweaks, Kvantum, Numix Theme)"
 fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
