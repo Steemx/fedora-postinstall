@@ -66,15 +66,16 @@ log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
 # 1. Preparar repositorios multimedia y códecs de audio externos
-/usr/bin/dnf install -y libfreeaptx libldac fdk-aac && \
-/usr/bin/dnf update -y @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && \
-/usr/bin/dnf group install -y sound-and-video
+/usr/bin/dnf install -y libfreeaptx libldac fdk-aac
 
-# 2. Instalación de librerías de video y OpenH264
+# 2. Instalación del grupo multimedia con la sintaxis nativa de DNF5
+/usr/bin/dnf group install -y "Sound and Video" --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
+
+# 3. Instalación de librerías de video y OpenH264
 /usr/bin/dnf install -y ffmpeg ffmpeg-libs libva libva-utils openh264 gstreamer1-plugin-openh264 mozilla-openh264
 /usr/bin/dnf config-manager setopt fedora-cisco-openh264.enabled=1
 
-# 3. Driver de video nativo para Intel Celeron N4020 (Gemini Lake)
+# 4. Driver de video nativo para Intel Celeron N4020 (Gemini Lake)
 /usr/bin/dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing
 log_status $? "Códecs multimedia y drivers de video Intel"
 
