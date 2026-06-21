@@ -40,7 +40,7 @@ installonly_limit=3
 clean_requirements_on_remove=True
 best=False
 skip_if_unavailable=True
-fastestmirror=True
+#fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
 EOF
@@ -117,14 +117,14 @@ EOF
   echo "2" > "$FASE_FILE"
   chown $REAL_USER:$REAL_USER "$LOG_FILE" "$FASE_FILE"
   
-  # Registrar relanzamiento automático en el autostart para la Fase 2
+# Registrar relanzamiento automático en el autostart para la Fase 2
   sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
   sudo -u $REAL_USER cat << EOF > $USER_HOME/.config/autostart/postinstall_fase2.desktop
 [Desktop Entry]
 Type=Application
 Name=Fedora Postinstall Fase 2
-Exec=sudo $USER_HOME/fedora-postinstall.sh
-Terminal=true
+Exec=qterminal -e "sudo $USER_HOME/fedora-postinstall.sh"
+Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
 
