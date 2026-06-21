@@ -123,64 +123,44 @@ else
 fi
 log_status $? "Eliminación completa y bloqueo de firewalld en DNF"
 
-echo "=== 11. Detección Inteligente y Configuración de Teclado (LXQt + Miriway) ==="
-CURRENT_DESKTOP=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:lower:]' '[:upper:]')
-SESSION_TYPE=$(echo "$XDG_SESSION_TYPE" | tr '[:lower:]' '[:upper:]')
+echo "=== 11. Configuración de Teclado (LXQt + Miriway) ==="
+# Ajuste en la sesión nativa de LXQt (Esto fuerza el entorno antes de Miriway)
+LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
+sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
 
-if [[ "$CURRENT_DESKTOP" == *"LXQT"* && ("$SESSION_TYPE" == *"WAYLAND"* || -f /usr/bin/miriway || -d /etc/xdg/xdg-miriway) ]]; then
-    echo "Entorno LXQt con Wayland/Miriway detectado. Forzando teclado latinoamericano..."
-    
-    # 1. Ajuste global del sistema usando bloques CAT nativos (A prueba de fallos de tuberías)
-    if [ -f /etc/environment ]; then
-        sed -i '/XKB_DEFAULT_LAYOUT/d' /etc/environment
-        sed -i '/XKB_DEFAULT_MODEL/d' /etc/environment
-    fi
-    
-    # Inyección directa sin tuberías ni eco
-    cat << 'EOF' >> /etc/environment
-XKB_DEFAULT_LAYOUT=latam
-XKB_DEFAULT_MODEL=pc105
-EOF
-
-    # 2. Ajuste específico en el config de Miriway
-    MIRIWAY_CONFIG="$USER_HOME/.config/miriway-shell.config"
-    sudo -u $REAL_USER mkdir -p "$(dirname "$MIRIWAY_CONFIG")"
-    if [ -f "$MIRIWAY_CONFIG" ]; then
-        sudo -u $REAL_USER sed -i '/app-env-amend=/d' "$MIRIWAY_CONFIG"
-    fi
-    echo "app-env-amend=XKB_DEFAULT_LAYOUT=latam:XKB_DEFAULT_MODEL=pc105" | sudo -u $REAL_USER tee -a "$MIRIWAY_CONFIG" > /dev/null
-
-    # 3. Ajuste en la sesión nativa de LXQt
-    LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
-    sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
-    if [ -f "$LXQT_SESSION_CONF" ]; then
-        sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
-        sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
-    fi
+if [ -f "$LXQT_SESSION_CONF" ]; then
+    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
+    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
     sudo -u $REAL_USER sed -i '/\[Environment\]/d' "$LXQT_SESSION_CONF" 2>/dev/null || true
-    
-    sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
+fi
+
+# Inyectamos de forma nativa la sección Environment en el config de LXQt
+sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
 
 [Environment]
 XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
-    # 4. Script de pre-arranque forzado (Bala de plata)
-    PRE_START_SCRIPT="$USER_HOME/.config/lxqt/session-pre-start.sh"
-    sudo -u $REAL_USER cat << 'EOF' > "$PRE_START_SCRIPT"
+# Ajuste específico en el config de Miriway
+MIRIWAY_CONFIG="$USER_HOME/.config/miriway-shell.config"
+sudo -u $REAL_USER mkdir -p "$(dirname "$MIRIWAY_CONFIG")"
+if [ -f "$MIRIWAY_CONFIG" ]; then
+    sudo -u $REAL_USER sed -i '/app-env-amend=/d' "$MIRIWAY_CONFIG"
+fi
+sudo -u $REAL_USER echo "app-env-amend=XKB_DEFAULT_LAYOUT=latam:XKB_DEFAULT_MODEL=pc105" >> "$MIRIWAY_CONFIG"
+
+# Script de pre-arranque forzado de LXQt (Bala de plata)
+PRE_START_SCRIPT="$USER_HOME/.config/lxqt/session-pre-start.sh"
+sudo -u $REAL_USER cat << 'EOF' > "$PRE_START_SCRIPT"
 #!/usr/bin/env bash
 export XKB_DEFAULT_LAYOUT=latam
 export XKB_DEFAULT_MODEL=pc105
 EOF
-    chmod +x "$PRE_START_SCRIPT"
-    chown $REAL_USER:$REAL_USER "$PRE_START_SCRIPT"
+chmod +x "$PRE_START_SCRIPT"
+chown $REAL_USER:$REAL_USER "$PRE_START_SCRIPT"
 
-    log_status 0 "Configuración masiva de teclado latinoamericano para LXQt-Miriway"
-else
-    echo "Entorno diferente detectado, saltando inyección de teclado latinoamericano."
-    log_status 0 "Teclado latinoamericano (Saltado - No requerido)"
-fi
+log_status 0 "Configuración masiva de teclado latinoamericano para LXQt-Miriway"
 
 echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
