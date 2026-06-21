@@ -53,8 +53,8 @@ echo "=== 3. Habilitando Flatpak and repositorio Flathub ==="
 log_status $? "Repositorio Flathub"
 
 echo "=== 4. Actualizando el sistema base ==="
-/usr/bin/dnf -y update && /usr/bin/dnf group upgrade -y core && /usr/bin/dnf4 group install -y core
-log_status $? "Actualización del sistema base y Core"
+/usr/bin/dnf -y update
+log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 /usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 arj lzma arj lzop cpio webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop
@@ -67,8 +67,6 @@ log_status $? "Fuentes del sistema"
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
 # 1. Preparar repositorios multimedia y códecs de audio externos
 /usr/bin/dnf install -y libfreeaptx libldac fdk-aac && \
-/usr/bin/dnf4 group install -y multimedia && \
-/usr/bin/dnf swap -y 'ffmpeg-free' 'ffmpeg' --allowerasing && \
 /usr/bin/dnf update -y @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && \
 /usr/bin/dnf group install -y sound-and-video
 
@@ -77,7 +75,6 @@ echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
 /usr/bin/dnf config-manager setopt fedora-cisco-openh264.enabled=1
 
 # 3. Driver de video nativo para Intel Celeron N4020 (Gemini Lake)
-# Forzamos intel-media-driver que es el correcto para esta arquitectura
 /usr/bin/dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing
 log_status $? "Códecs multimedia y drivers de video Intel"
 
@@ -114,10 +111,8 @@ echo "Generando initramfs con Dracut..."
 log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
 echo "=== 10. Eliminando por completo el Firewall (Firewalld) ==="
-# Detener de inmediato y desinstalar
 /usr/bin/systemctl stop firewalld.service 2>/dev/null || true
 /usr/bin/dnf remove -y firewalld
-# Bloquear firewalld en DNF para que ninguna dependencia (como kde-connect) lo reinstale
 if ! grep -q "exclude=" /etc/dnf/dnf.conf; then
   echo "exclude=firewalld" >> /etc/dnf/dnf.conf
 else
@@ -125,9 +120,9 @@ else
 fi
 log_status $? "Eliminación completa y bloqueo de firewalld"
 
-echo "=== 11. Instalando Labwc y Configurando Teclado (Adiós Miriway) ==="
-# 1. Instalar Labwc (El compositor Wayland rápido y estable para LXQt)
-/usr/bin/dnf install -y labwc
+echo "=== 11. Instalando Labwc y Teclado Latam (Miriway Intacto) ==="
+# 1. Instalar el compositor Labwc y la sesión de Wayland (usando sintaxis limpia DNF5)
+/usr/bin/dnf install -y labwc lxqt-wayland-session
 
 # 2. Configurar el teclado latinoamericano de forma global nativa
 if [ -f /etc/environment ]; then
@@ -139,7 +134,7 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
-# 3. Forzar el entorno en la sesión nativa de LXQt por seguridad
+# 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
 LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
 sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
 if [ -f "$LXQT_SESSION_CONF" ]; then
@@ -152,10 +147,7 @@ sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
 XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
-
-# 4. Remover Miriway para limpiar el sistema y evitar confusiones en el login
-/usr/bin/dnf remove -y miriway xdg-desktop-portal-wlr
-log_status $? "Instalación de Labwc, eliminación de Miriway y teclado Latam"
+log_status $? "Instalación de Labwc y configuración de teclado Latam"
 
 echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 /usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
@@ -164,7 +156,6 @@ echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 13. Instalando Programas del Sistema (DNF) ==="
-# Se añade el flag para ignorar dependencias débiles y blindar la ausencia de firewalld
 /usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
   log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
@@ -174,7 +165,6 @@ fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
-# Ocultar barras de progreso animadas rotas usando env TERM=dumb
 env TERM=dumb /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                                               com.github.tchx84.Flatseal \
                                                               io.github.flattool.Warehouse \
@@ -261,8 +251,8 @@ echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
 
 echo "=============================================================================="
 echo " ¡PROCESO COMPLETADO! Todo se ha configurado de manera definitiva."
-echo " El equipo se reiniciará automáticamente en 5 segundos..."
-echo " Recuerda seleccionar 'LXQt (Labwc)' en tu pantalla de login si es necesario."
+echo " El equipo se reiniciará automáticamente en 10 segundos para que leas..."
+echo " Al volver, cambia la sesión a 'LXQt (Wayland)' o Labwc si aparece."
 echo "=============================================================================="
 sleep 10
 /usr/sbin/reboot
