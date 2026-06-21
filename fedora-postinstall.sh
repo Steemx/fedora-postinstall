@@ -106,7 +106,7 @@ EOF
 
   echo "=== 9. Habilitando GuC/HuC para Gráficos Intel ==="
   cat << 'EOF' > /etc/modprobe.d/i915.conf
-options i915 enable_guc=2
+options i915 enable_guc=3
 options i915 enable_fbc=1
 EOF
   echo "Generando initramfs con Dracut..."
@@ -155,7 +155,6 @@ else
   echo "=== 10. Configurando el Firewall (KDE Connect y mDNS) ==="
   systemctl enable --now firewalld
   firewall-cmd --permanent --add-service=kdeconnect
-  firewall-cmd --permanent --add-service=mdns
   firewall-cmd --reload
   log_status $? "Configuración del Firewall"
 
