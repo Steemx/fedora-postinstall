@@ -36,7 +36,7 @@ installonly_limit=3
 clean_requirements_on_remove=True
 best=False
 skip_if_unavailable=True
-fastestmirror=True
+#fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
 EOF
@@ -146,11 +146,11 @@ echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
 log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 13. Instalando Programas del Sistema (DNF) ==="
-/usr/bin/dnf install -y steam kde-connect
+/usr/bin/dnf install -y steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect)"
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
