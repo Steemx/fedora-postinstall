@@ -65,21 +65,21 @@ echo "=== 6. Instalando fuentes del sistema ==="
 log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
-# 1. Resolver el conflicto principal de ffmpeg reemplazando la versión libre por la de RPM Fusion
-/usr/bin/dnf swap -y ffmpeg-free ffmpeg --allowerasing
+# 1. Eliminar primero los paquetes "recortados" de Fedora para limpiar el camino
+/usr/bin/dnf remove -y ffmpeg-free libavcodec-free libavformat-free libavutil-free libswscale-free libswresample-free libpostproc-free
 
-# 2. Instalar librerías complementarias de audio y códecs externos
-/usr/bin/dnf install -y libfreeaptx libldac fdk-aac ffmpeg-libs libva libva-utils
+# 2. Instalar la suite completa de FFmpeg desde RPM Fusion
+/usr/bin/dnf install -y ffmpeg ffmpeg-libs libavdevice --allowerasing
 
-# 3. Instalación/Actualización del grupo multimedia usando la sintaxis nativa de DNF5
-/usr/bin/dnf group upgrade -y "Sound and Video" --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin --allowerasing
+# 3. Instalar códecs de audio y drivers de video específicos para tu Intel Celeron
+/usr/bin/dnf install -y libfreeaptx libldac fdk-aac gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly gstreamer1-plugin-libav
+/usr/bin/dnf install -y intel-media-driver libva libva-utils
 
-# 4. Configurar OpenH264 y drivers de video nativos con aceleración completa para Intel Celeron N4020
-/usr/bin/dnf install -y gstreamer1-plugin-openh264 mozilla-openh264
+# 4. Habilitar y actualizar el códec OpenH264 de Cisco (para Firefox/WebRTC)
 /usr/bin/dnf config-manager setopt fedora-cisco-openh264.enabled=1
-/usr/bin/dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing
+/usr/bin/dnf install -y gstreamer1-plugin-openh264 mozilla-openh264
 
-log_status $? "Códecs multimedia y drivers de video Intel (RPM Fusion)"
+log_status $? "Códecs multimedia y drivers de video Intel (Instalación Directa)"
 
 echo "=== 8. Ajustes de Rendimiento Avanzados (ZRAM y sysctl) ==="
 cat << 'EOF' > /etc/sysctl.d/99-zram-tune.conf
