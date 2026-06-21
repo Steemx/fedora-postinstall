@@ -148,6 +148,7 @@ fi
 echo "=== 14. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 
+# 14a. KDE Connect (Usando el indicador nativo)
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
 [Desktop Entry]
 Type=Application
@@ -155,25 +156,29 @@ Name=KDE Connect Indicator
 Exec=kdeconnect-indicator
 Icon=kdeconnect
 Terminal=false
-X-GNOME-Autostart-enabled=true
+Categories=Network;
 EOF
 
+# 14b. Discord Flatpak (Minimizado y compatible con LXQt)
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
 [Desktop Entry]
 Type=Application
 Name=Discord
 Exec=/usr/bin/flatpak run com.discordapp.Discord --start-minimized
+Icon=com.discordapp.Discord
 Terminal=false
-X-GNOME-Autostart-enabled=true
+Categories=Network;InstantMessaging;
 EOF
 
+# 14c. Telegram Flatpak (En bandeja y compatible con LXQt)
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
 [Desktop Entry]
 Type=Application
 Name=Telegram
 Exec=/usr/bin/flatpak run org.telegram.desktop -startintray
+Icon=telegram
 Terminal=false
-X-GNOME-Autostart-enabled=true
+Categories=Network;InstantMessaging;
 EOF
 log_status $? "Configuración de inicio automático minimizado"
 
