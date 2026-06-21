@@ -65,16 +65,20 @@ echo "=== 6. Instalando fuentes del sistema ==="
 log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
+# 1. Preparar repositorios multimedia y códecs de audio externos
 /usr/bin/dnf install -y libfreeaptx libldac fdk-aac && \
 /usr/bin/dnf4 group install -y multimedia && \
 /usr/bin/dnf swap -y 'ffmpeg-free' 'ffmpeg' --allowerasing && \
 /usr/bin/dnf update -y @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && \
-/usr/bin/dnf group install -y sound-and-video && \
-/usr/bin/dnf install -y ffmpeg ffmpeg-libs libva libva-utils && \
-/usr/bin/dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing && \
-/usr/bin/dnf install -y libva-intel-driver && \
-/usr/bin/dnf install -y openh264 gstreamer1-plugin-openh264 mozilla-openh264 && \
+/usr/bin/dnf group install -y sound-and-video
+
+# 2. Instalación de librerías de video y OpenH264
+/usr/bin/dnf install -y ffmpeg ffmpeg-libs libva libva-utils openh264 gstreamer1-plugin-openh264 mozilla-openh264
 /usr/bin/dnf config-manager setopt fedora-cisco-openh264.enabled=1
+
+# 3. Driver de video nativo para Intel Celeron N4020 (Gemini Lake)
+# Forzamos intel-media-driver que es el correcto para esta arquitectura
+/usr/bin/dnf swap -y libva-intel-media-driver intel-media-driver --allowerasing
 log_status $? "Códecs multimedia y drivers de video Intel"
 
 echo "=== 8. Ajustes de Rendimiento Avanzados (ZRAM y sysctl) ==="
@@ -161,11 +165,11 @@ log_status $? "Overrides de temas para Flatpak"
 
 echo "=== 13. Instalando Programas del Sistema (DNF) ==="
 # Se añade el flag para ignorar dependencias débiles y blindar la ausencia de firewalld
-/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect
+/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect)"
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 fi
 
 echo "=== 14. Instalando Aplicaciones Flatpak ==="
@@ -260,5 +264,5 @@ echo " ¡PROCESO COMPLETADO! Todo se ha configurado de manera definitiva."
 echo " El equipo se reiniciará automáticamente en 5 segundos..."
 echo " Recuerda seleccionar 'LXQt (Labwc)' en tu pantalla de login si es necesario."
 echo "=============================================================================="
-sleep 5
+sleep 10
 /usr/sbin/reboot
