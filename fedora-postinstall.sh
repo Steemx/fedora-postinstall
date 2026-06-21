@@ -109,10 +109,12 @@ echo "Generando initramfs con Dracut..."
 /usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
-echo "=== 10. Configurando el Firewall (KDE Connect) ==="
-/usr/bin/firewall-cmd --permanent --add-service=kdeconnect
-/usr/bin/firewall-cmd --reload
-log_status $? "Configuración del Firewall (KDE Connect)"
+echo "=== 10. Eliminando el Firewall (Firewalld) ==="
+# Detener el servicio de inmediato
+/usr/bin/systemctl stop firewalld.service 2>/dev/null || true
+# Deshabilitar y remover el paquete del sistema
+/usr/bin/dnf remove -y firewalld
+log_status $? "Eliminación completa de firewalld"
 
 echo "=== 11. Detección Inteligente y Configuración de Teclado (LXQt + Miriway) ==="
 CURRENT_DESKTOP=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:lower:]' '[:upper:]')
