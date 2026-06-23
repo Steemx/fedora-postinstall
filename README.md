@@ -7,7 +7,7 @@ curl -sSL https://raw.githubusercontent.com/Steemx/fedora-postinstall/main/fedor
 
 Version sin labwc
 
-curl -sSL https://raw.githubusercontent.com/Steemx/fedora-postinstall/main/fedora-postinstall-nolabwc.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/Steemx/fedora-postinstall/main/fedora-postinstall2.sh | sudo bash
 
 Tambien sirve:
 
