@@ -237,6 +237,7 @@ log_status $? "Configuración de inicio automático minimizado"
 echo "=== 17. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
 /usr/bin/systemctl enable fstrim.timer
+/usr/bin/systemctl enable --now power-profiles-daemon
 log_status $? "Optimización de arranque final y fstrim"
 
 echo "=== 18. Limpiando archivos temporales y caché ==="
