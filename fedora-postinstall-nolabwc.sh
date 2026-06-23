@@ -61,7 +61,7 @@ echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 6. Instalando fuentes del sistema ==="
-/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts
+/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts
 log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
