@@ -62,7 +62,7 @@ echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 5a. Instalando Administrador de Archivos (Nautilus) ==="
-/usr/bin/dnf -y install nautilus --allowerasing
+/usr/bin/dnf -y install nautilus
 log_status $? "Administrador de Archivos Nautilus"
 
 echo "=== 6. Instalando fuentes del sistema ==="
