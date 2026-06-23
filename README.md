@@ -5,6 +5,10 @@ Instalacion directa
 
 curl -sSL https://raw.githubusercontent.com/Steemx/fedora-postinstall/main/fedora-postinstall.sh | sudo bash
 
+Version sin labwc
+
+curl -sSL https://raw.githubusercontent.com/Steemx/fedora-postinstall/main/fedora-postinstall-nolabwc.sh | sudo bash
+
 Tambien sirve:
 
 # 1. Descargas el archivo
