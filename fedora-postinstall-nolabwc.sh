@@ -124,7 +124,7 @@ else
 fi
 log_status $? "Eliminación completa y bloqueo de firewalld"
 
-echo "=== 11. Instalando Labwc y Teclado Latam ==="
+#echo "=== 11. Instalando Labwc y Teclado Latam ==="
 
 
 # 2. Configurar el teclado latinoamericano de forma global nativa (Evitando duplicados)
@@ -138,57 +138,57 @@ XKB_DEFAULT_MODEL=pc105
 EOF
 
 # 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
-LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
-sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
-if [ -f "$LXQT_SESSION_CONF" ]; then
-    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
-    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
-fi
-sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
+#LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
+#sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
+#if [ -f "$LXQT_SESSION_CONF" ]; then
+#    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
+#    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
+#fi
+#sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
 
-[Environment]
-XKB_DEFAULT_LAYOUT=latam
-XKB_DEFAULT_MODEL=pc105
-EOF
-log_status $? "Instalación de Labwc y configuración de teclado Latam"
+#[Environment]
+#XKB_DEFAULT_LAYOUT=latam
+#XKB_DEFAULT_MODEL=pc105
+#EOF
+#log_status $? "Configuración de teclado Latam"
 
-echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
-/usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
+#echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
+#/usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
 # CORREGIDO: "Numix" con N mayúscula para coincidir exactamente con el nombre de la carpeta del sistema
-/usr/bin/flatpak override --system --env=GTK_THEME=Numix
-/usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
-log_status $? "Overrides de temas para Flatpak"
+#/usr/bin/flatpak override --system --env=GTK_THEME=Numix
+#/usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
+#log_status $? "Overrides de temas para Flatpak"
 
-echo "=== 13. Configurando Soporte Completo para Bluetooth ==="
+#echo "=== 13. Configurando Soporte Completo para Bluetooth ==="
 # 1. Instalar servicio de Bluetooth y la bandeja del sistema (Blueman)
-/usr/bin/dnf install -y bluez bluez-utils blueman
+#/usr/bin/dnf install -y bluez bluez-utils blueman
 # 2. Habilitar y arrancar el servicio nativo
-/usr/bin/systemctl enable bluetooth.service
-/usr/bin/systemctl start bluetooth.service
+#/usr/bin/systemctl enable bluetooth.service
+#/usr/bin/systemctl start bluetooth.service
 # 3. Lanzamiento automático en el inicio del entorno
-sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
-sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/blueman-applet.desktop
-[Desktop Entry]
-Type=Application
-Name=Blueman Applet
-Icon=blueman
-Exec=blueman-applet
-Terminal=false
-Categories=Network;HardwareSettings;
-EOF
-log_status $? "Configuración e inicio automático de Bluetooth (Blueman)"
+#sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
+#sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/blueman-applet.desktop
+#[Desktop Entry]
+#Type=Application
+#Name=Blueman Applet
+#Icon=blueman
+#Exec=blueman-applet
+#Terminal=false
+#Categories=Network;HardwareSettings;
+#EOF
+#log_status $? "Configuración e inicio automático de Bluetooth (Blueman)"
 
 echo "=== 14. Instalando Programas del Sistema (DNF) ==="
-/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox labwc-tweaks kvantum numix-gtk-theme numix-icon-theme
+/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
-  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox, Labwc-tweaks, Kvantum, Numix Theme)"
+  log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox, Labwc-tweaks, Kvantum, Numix Theme)"
+  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 fi
 
 echo "=== 15. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
-env TERM=dumb /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
+/usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
                                                               com.github.tchx84.Flatseal \
                                                               io.github.flattool.Warehouse \
                                                               org.telegram.desktop \
@@ -290,7 +290,7 @@ echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
 echo "=============================================================================="
 echo " ¡PROCESO COMPLETADO! Todo se ha configurado de manera definitiva."
 echo " El equipo se reiniciará automáticamente en 10 segundos para que leas..."
-echo " Al volver, cambia la sesión a 'LXQt (Wayland)' o Labwc si aparece."
+echo " Al volver deberia estar el greeter de dms."
 echo "=============================================================================="
 sleep 10
 # CORREGIDO: Uso de reboot nativo e interactivo con systemd
