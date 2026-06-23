@@ -58,8 +58,12 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz nautilus bzip2 unrar p7zip lbzip2 lzma arj lzop cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
+/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
+
+echo "=== 5a. Instalando Administrador de Archivos (Nautilus) ==="
+/usr/bin/dnf -y install nautilus --allowerasing
+log_status $? "Administrador de Archivos Nautilus"
 
 echo "=== 6. Instalando fuentes del sistema ==="
 /usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts
