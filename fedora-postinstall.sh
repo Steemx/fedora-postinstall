@@ -57,11 +57,11 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 arj lzma arj lzop cpio webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop
+/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 arj lzma arj lzop cpio webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 6. Instalando fuentes del sistema ==="
-/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts
+/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts
 log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
