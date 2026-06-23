@@ -35,7 +35,7 @@ gpgcheck=True
 installonly_limit=3
 clean_requirements_on_remove=True
 best=False
-skip_if_unavailable=True
+#skip_if_unavailable=True
 #fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
@@ -49,6 +49,7 @@ echo "=== 2. Instalando Repositorios RPM Fusion y Plugins ==="
 log_status $? "Repositorios RPM Fusion y Plugins"
 
 echo "=== 3. Habilitando Flatpak and repositorio Flathub ==="
+/usr/bin/dnf -y install flatpak
 /usr/bin/flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 log_status $? "Repositorio Flathub"
 
@@ -57,7 +58,7 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 arj lzma arj lzop cpio webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
+/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 arj lzma arj lzop cpio git webp-pixbuf-loader unrar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 6. Instalando fuentes del sistema ==="
