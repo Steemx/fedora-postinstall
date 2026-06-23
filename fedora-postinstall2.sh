@@ -61,10 +61,6 @@ echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 /usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
 
-echo "=== 5a. Instalando Administrador de Archivos (Nautilus) ==="
-/usr/bin/dnf -y install nautilus
-log_status $? "Administrador de Archivos Nautilus"
-
 echo "=== 6. Instalando fuentes del sistema ==="
 /usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts
 log_status $? "Fuentes del sistema"
@@ -204,7 +200,11 @@ else
   log_status 1 "Instalación de aplicaciones Flatpak"
 fi
 
-echo "=== 16. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
+echo "=== 16. Instalando Administrador de Archivos (Nautilus) ==="
+/usr/bin/dnf -y install nautilus
+log_status $? "Administrador de Archivos Nautilus"
+
+echo "=== 17. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
@@ -238,18 +238,18 @@ Categories=Network;InstantMessaging;
 EOF
 log_status $? "Configuración de inicio automático minimizado"
 
-echo "=== 17. Optimizando Tiempos de Arranque Final ==="
+echo "=== 18. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
 /usr/bin/systemctl enable fstrim.timer
 /usr/bin/systemctl enable --now power-profiles-daemon
 log_status $? "Optimización de arranque final y fstrim"
 
-echo "=== 18. Limpiando archivos temporales y caché ==="
+echo "=== 19. Limpiando archivos temporales y caché ==="
 /usr/bin/dnf clean all
 /usr/bin/flatpak uninstall --unused -y
 log_status $? "Limpieza del sistema"
 
-echo "=== 19. Generando pantalla de reporte para el próximo inicio ==="
+echo "=== 20. Generando pantalla de reporte para el próximo inicio ==="
 /usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
 
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
