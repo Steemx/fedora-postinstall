@@ -58,7 +58,7 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
+/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop nemo cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 6. Instalando fuentes del sistema ==="
@@ -200,9 +200,9 @@ else
   log_status 1 "Instalación de aplicaciones Flatpak"
 fi
 
-echo "=== 16. Instalando Administrador de Archivos (Nautilus) ==="
-/usr/bin/dnf -y install nautilus
-log_status $? "Administrador de Archivos Nautilus"
+#echo "=== 16. Instalando Administrador de Archivos (Nautilus) ==="
+#/usr/bin/dnf -y install nautilus
+#log_status $? "Administrador de Archivos Nautilus"
 
 echo "=== 17. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
