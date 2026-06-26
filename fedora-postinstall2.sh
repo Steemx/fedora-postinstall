@@ -210,7 +210,7 @@ sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
 [Desktop Entry]
 Type=Application
-Name=KDE Connect Indicator
+Name=sh -c "sleep 10 && KDE Connect Indicator"
 Exec=kdeconnect-indicator
 Icon=kdeconnect
 Terminal=false
@@ -221,7 +221,7 @@ sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Di
 [Desktop Entry]
 Type=Application
 Name=Discord
-Exec=/usr/bin/flatpak run com.discordapp.Discord --start-minimized
+Exec=sh -c "sleep 40 && /usr/bin/flatpak run com.discordapp.Discord --start-minimized"
 Icon=com.discordapp.Discord
 Terminal=false
 Categories=Network;InstantMessaging;
@@ -231,7 +231,7 @@ sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desk
 [Desktop Entry]
 Type=Application
 Name=Telegram
-Exec=/usr/bin/flatpak run org.telegram.desktop -startintray
+Exec=sh -c "sleep 20 && /usr/bin/flatpak run org.telegram.desktop -startintray"
 Icon=telegram
 Terminal=false
 Categories=Network;InstantMessaging;
