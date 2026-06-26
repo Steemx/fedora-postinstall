@@ -58,7 +58,10 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop nemo cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
+/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop thunar cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
+echo "== 5a. Instalando nwg-look =="
+/usr/bin/dnf copr enable solopasha/hyprland -y && sudo dnf install nwg-look -y
+/usr/bin/dnf copr disable solopasha/hyprland
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 6. Instalando fuentes del sistema y temas ==="
@@ -111,8 +114,8 @@ options i915 enable_guc=3
 options i915 enable_fbc=1
 options i915 modeset=1
 EOF
-echo "Generando initramfs con Dracut..."
-/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
+#echo "Generando initramfs con Dracut..."
+#/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
 echo "=== 10. Eliminando por completo el Firewall (Firewalld) ==="
@@ -124,8 +127,6 @@ else
   sed -i 's/exclude=/exclude=firewalld,/g' /etc/dnf/dnf.conf
 fi
 log_status $? "Eliminación completa y bloqueo de firewalld"
-
-#echo "=== 11. Instalando Labwc y Teclado Latam ==="
 
 
 # 2. Configurar el teclado latinoamericano de forma global nativa (Evitando duplicados)
@@ -200,9 +201,6 @@ else
   log_status 1 "Instalación de aplicaciones Flatpak"
 fi
 
-#echo "=== 16. Instalando Administrador de Archivos (Nautilus) ==="
-#/usr/bin/dnf -y install nautilus
-#log_status $? "Administrador de Archivos Nautilus"
 
 echo "=== 17. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
@@ -265,6 +263,9 @@ log_status $? "Limpieza del sistema"
 echo "=== 20. Generando pantalla de reporte para el próximo inicio ==="
 /usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
 
+echo "Generando initramfs con Dracut..."
+/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
+
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
 sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
 #!/usr/bin/env bash
@@ -290,6 +291,7 @@ EOF
 
 # --- COMPROBACIONES DE HARDWARE (MUESTRAN EL ESTADO REAL EN EL LOG) ---
 echo "=== Comprobaciones de Hardware Post-Instalación ===" >> "$LOG_FILE"
+
 
 echo -e "\n[Estado de Intel GuC]:" >> "$LOG_FILE"
 /usr/bin/dmesg | grep -i guc >> "$LOG_FILE" 2>&1 || echo "No se encontraron registros de GuC" >> "$LOG_FILE"
