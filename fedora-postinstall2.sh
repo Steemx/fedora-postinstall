@@ -61,8 +61,8 @@ echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 /usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop nemo cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
 
-echo "=== 6. Instalando fuentes del sistema ==="
-/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts rsms-inter-vf-fonts
+echo "=== 6. Instalando fuentes del sistema y temas ==="
+/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts rsms-inter-vf-fonts qt6ct qt5ct kvantum xdg-desktop-portal-kde
 log_status $? "Fuentes del sistema"
 
 echo "=== 7. Configurando Códecs y Multimedia Avanzada ==="
@@ -237,6 +237,19 @@ Terminal=false
 Categories=Network;InstantMessaging;
 EOF
 log_status $? "Configuración de inicio automático minimizado"
+
+echo "=== 17a. Configurando entorno Qt ==="
+sudo -u "$REAL_USER" mkdir -p "$USER_HOME/.config/environment.d"
+
+cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/environment.d/qt.conf" > /dev/null
+QT_QPA_PLATFORMTHEME=qt6ct
+QT_STYLE_OVERRIDE=Fusion
+GTK_USE_PORTAL=1
+QT_QUICK_CONTROLS_STYLE=org.kde.desktop
+XDG_CURRENT_DESKTOP=KDE
+KDE_SESSION_VERSION=6
+EOF
+log_status $? "override theme"
 
 echo "=== 18. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
