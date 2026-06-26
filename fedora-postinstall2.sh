@@ -61,7 +61,8 @@ echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 /usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop thunar niri kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
 echo "== 5a. Instalando nwg-look =="
 /usr/bin/dnf copr enable solopasha/hyprland -y && sudo dnf install nwg-look -y
-/usr/bin/dnf copr disable solopasha/hyprland
+/usr/bin/dnf copr disable solopasha/hyprland -y
+/usr/bin/dnf copr enable lionheartp/Hyprland -y && sudo dnf install noctalia-git noctalia-greeter 
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "=== 6. Instalando fuentes del sistema y temas ==="
