@@ -289,7 +289,7 @@ sudo -u $REAL_USER cat << EOF > $USER_HOME/.config/autostart/show_log.desktop
 [Desktop Entry]
 Type=Application
 Name=Show Install Log
-Exec=qterminal -e "/usr/bin/bash -c '$SCRIPT_LOG_VIEWER'"
+Exec=kitty -e "/usr/bin/bash -c '$SCRIPT_LOG_VIEWER'"
 Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
