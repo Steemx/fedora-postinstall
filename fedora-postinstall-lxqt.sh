@@ -65,10 +65,6 @@ echo "== 5a. Instalando nwg-look =="
 /usr/bin/dnf copr enable lionheartp/Hyprland -y && sudo dnf install noctalia-git noctalia-greeter 
 log_status $? "Herramientas de compresión y utilidades"
 
-echo "== 5b. Instalando base gnome =="
-/usr/bin/dnf -y install gdm gnome-session thunar gvfs tumbler thunar-volman kitty
-log_status $? "Base gnome y thunar"
-
 echo "=== 6. Instalando fuentes del sistema y temas ==="
 /usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts rsms-inter-vf-fonts qt6ct qt5ct papirus-icon-theme kvantum xdg-desktop-portal-kde
 log_status $? "Fuentes del sistema"
@@ -144,46 +140,39 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
-# 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
-#LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
-#sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
-#if [ -f "$LXQT_SESSION_CONF" ]; then
-#    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
-#    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
-#fi
-#sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
+ 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
+LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
+sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
+if [ -f "$LXQT_SESSION_CONF" ]; then
+    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
+    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
+fi
 
-#[Environment]
-#XKB_DEFAULT_LAYOUT=latam
-#XKB_DEFAULT_MODEL=pc105
-#EOF
-#log_status $? "Configuración de teclado Latam"
+sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
+[Environment]
+XKB_DEFAULT_LAYOUT=latam
+XKB_DEFAULT_MODEL=pc105
+EOF
+log_status $? "Configuración de teclado Latam"
 
-#echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
-#/usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
-# CORREGIDO: "Numix" con N mayúscula para coincidir exactamente con el nombre de la carpeta del sistema
-#/usr/bin/flatpak override --system --env=GTK_THEME=Numix
-#/usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
-#log_status $? "Overrides de temas para Flatpak"
-
-#echo "=== 13. Configurando Soporte Completo para Bluetooth ==="
+echo "=== 13. Configurando Soporte Completo para Bluetooth ==="
 # 1. Instalar servicio de Bluetooth y la bandeja del sistema (Blueman)
-#/usr/bin/dnf install -y bluez bluez-utils blueman
+/usr/bin/dnf install -y bluez bluez-utils blueman
 # 2. Habilitar y arrancar el servicio nativo
-#/usr/bin/systemctl enable bluetooth.service
-#/usr/bin/systemctl start bluetooth.service
+/usr/bin/systemctl enable bluetooth.service
+/usr/bin/systemctl start bluetooth.service
 # 3. Lanzamiento automático en el inicio del entorno
-#sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
-#sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/blueman-applet.desktop
-#[Desktop Entry]
-#Type=Application
-#Name=Blueman Applet
-#Icon=blueman
-#Exec=blueman-applet
-#Terminal=false
-#Categories=Network;HardwareSettings;
-#EOF
-#log_status $? "Configuración e inicio automático de Bluetooth (Blueman)"
+sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
+sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/blueman-applet.desktop
+[Desktop Entry]
+Type=Application
+Name=Blueman Applet
+Icon=blueman
+Exec=blueman-applet
+Terminal=false
+Categories=Network;HardwareSettings;
+EOF
+log_status $? "Configuración e inicio automático de Bluetooth (Blueman)"
 
 echo "=== 14. Instalando Programas del Sistema (DNF) ==="
 /usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
@@ -267,9 +256,6 @@ log_status $? "Limpieza del sistema"
 
 echo "=== 20. Generando pantalla de reporte para el próximo inicio ==="
 /usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
-
-#echo "Generando initramfs con Dracut..."
-#/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
 sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
