@@ -115,7 +115,7 @@ log_status $? "Ajustes de rendimiento (ZRAM y sysctl)"
 
 echo "=== 9. Habilitando GuC/HuC para Gráficos Intel ==="
 cat << 'EOF' > /etc/modprobe.d/i915.conf
-options i915 enable_guc=3
+options i915 enable_guc=2
 options i915 enable_fbc=1
 options i915 modeset=1
 EOF
