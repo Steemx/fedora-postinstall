@@ -58,7 +58,7 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz bzip2 unrar p7zip lbzip2 lzma arj lzop niri kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
+/usr/bin/dnf -y install xz bzip2 unrar p7zip wl-clipboard xclip lbzip2 lzma arj lzop niri kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
 echo "== 5a. Instalando nwg-look =="
 /usr/bin/dnf copr enable solopasha/hyprland -y && sudo dnf install nwg-look -y
 /usr/bin/dnf copr disable solopasha/hyprland -y
