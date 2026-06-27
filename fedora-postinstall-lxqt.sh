@@ -140,7 +140,7 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
- 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
+# 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
 LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
 sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
 if [ -f "$LXQT_SESSION_CONF" ]; then
