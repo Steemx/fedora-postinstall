@@ -248,11 +248,11 @@ cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/environment.d/qt.con
 QT_QPA_PLATFORMTHEME=qt6ct
 QT_STYLE_OVERRIDE=Fusion
 GTK_USE_PORTAL=1
-QT_QUICK_CONTROLS_STYLE=org.kde.desktop
-XDG_CURRENT_DESKTOP=KDE
-KDE_SESSION_VERSION=6
+XDG_CURRENT_DESKTOP=niri
+KDE_SESSION_TYPE=wayland
+ELECTRON_OZONE_PLATFORM_HINT=wayland
 EOF
-log_status $? "override theme"
+log_status $? "override de entorno y theme"
 
 echo "=== 18. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
