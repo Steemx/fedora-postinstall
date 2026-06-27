@@ -298,7 +298,7 @@ EOF
 echo "=== Comprobaciones de Hardware Post-Instalación ===" >> "$LOG_FILE"
 
 echo "Generando initramfs con Dracut..."
-/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
+/usr/sbin/dracut --force -v || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 
 echo -e "\n[Estado de Intel GuC]:" >> "$LOG_FILE"
 /usr/bin/dmesg | grep -i guc >> "$LOG_FILE" 2>&1 || echo "No se encontraron registros de GuC" >> "$LOG_FILE"
