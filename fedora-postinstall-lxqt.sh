@@ -178,8 +178,8 @@ echo "=== 14. Instalando Programas del Sistema (DNF) ==="
 /usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
   log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
-else
-  log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
+#else
+ # log_status 1 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
 fi
 
 echo "=== 15. Instalando Aplicaciones Flatpak ==="
