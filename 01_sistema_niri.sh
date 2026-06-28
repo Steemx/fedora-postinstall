@@ -60,6 +60,9 @@ echo -e "${ANUNCIAR}=== 5. Instalando Utilidades del Sistema ===${NC}"
 tuned-adm profile balanced
 log_status $? "Instalación de utilidades"
 
+# Nano lineas numeradas
+echo "set linenumbers" >> ~/.nanorc
+
 echo -e "${ANUNCIAR}=== 6. Instalando Niri, Noctalia y Entorno Base ===${NC}"
 /usr/bin/dnf copr enable yalter/niri-git -y
 /usr/bin/dnf copr enable lionheartp/Hyprland -y
