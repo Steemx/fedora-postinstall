@@ -40,7 +40,7 @@ log_status $? "Actualización del sistema"
 
 echo -e "${ANUNCIAR}=== 3. Habilitando Repositorios Clave y Códecs ===${NC}"
 # TU COMANDO ORIGINAL E INDESTRUCTIBLE
-/usr/bin/dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-\$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-\$(rpm -E %fedora).noarch.rpm
+/usr/bin/dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 /usr/bin/dnf upgrade -y --refresh
 /usr/bin/dnf group install "Multimedia" -y
 log_status $? "Repositorios RPM Fusion y Códecs"
