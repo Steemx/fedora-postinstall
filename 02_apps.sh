@@ -38,7 +38,7 @@ fi
 log_status $? "Configuración de Firewall"
 
 echo "=== 2. Instalando Aplicaciones del Sistema (DNF) ==="
-/usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
+/usr/bin/dnf install -y steam kde-connect firefox gamemode
 log_status $? "Instalación de Steam, KDE Connect y Firefox"
 
 echo "=== 3. Configurando carpetas de usuario e Inicio Automático ==="
