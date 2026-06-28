@@ -67,10 +67,15 @@ log_status $? "Actualización del sistema base"
 
 echo -e "${ANUNCIAR}=== 5. Instalando herramientas de compresión y utilidades ===${NC}"
 /usr/bin/dnf -y install xz bzip2 unrar p7zip wl-clipboard xclip lbzip2 lzma arj lzop kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
+echo -e "${ANUNCIAR}=== Creando carpetas del Home ===${NC}"
+/usr/bin/dnf install -y xdg-user-dirs
+sudo -u "$REAL_USER" xdg-user-dirs-update
+log_status $? "Creación de carpetas personales"
 log_status $? "Herramientas de compresión y utilidades"
 
-# Nano lineas numeradas
-echo "set linenumbers" >> ~/.nanorc
+# Nano lineas numeradas para tu usuario
+echo "set linenumbers" >> "$USER_HOME/.nanorc"
+chown $REAL_USER:$REAL_USER "$USER_HOME/.nanorc"
 
 echo -e "${ANUNCIAR}=== 5b. Instalando base ===${NC}"
 # Habilitar repositorios Git
