@@ -171,15 +171,17 @@ options i915 enable_fbc=1
 options i915 modeset=1
 EOF
 
-# FIX: Forzar cursor visible por software en SDDM (Evita cursor invisible en Intel/X11)
-mkdir -p /etc/X11/xorg.conf.d
-cat << 'EOF' > /etc/X11/xorg.conf.d/20-intel.conf
-Section "Device"
-    Identifier "Intel Graphics"
-    Driver     "intel"
-    Option     "SWcursor" "on"
-EndSection
+# 1. Crear el directorio de configuración de SDDM si no existe
+sudo mkdir -p /etc/sddm.conf.d
+
+# 2. Inyectar la orden para forzar el cursor y el tema de iconos básico en X11
+cat << 'EOF' | sudo tee /etc/sddm.conf.d/cursor.conf > /dev/null
+[Theme]
+CursorTheme=Adwaita
 EOF
+
+# 3. Borrar el archivo de Intel anterior para no generar conflictos raros
+sudo rm -f /etc/X11/xorg.conf.d/20-intel.conf
 log_status $? "Configuración Intel GuC/HuC y Fix de Cursor Visible"
 
 echo -e "${ANUNCIAR}=== 11. Configurando Distribución de Teclado y Entorno ===${NC}"
