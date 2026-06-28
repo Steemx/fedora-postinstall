@@ -78,6 +78,9 @@ echo "priority=1" | tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalt
     kernel-tools gamemode
 log_status $? "Instalación del entorno gráfico base"
 
+# Nano lineas numeradas
+echo "set linenumbers" >> ~/.nanorc
+
 echo -e "${ANUNCIAR}=== 7. Configurando Auto-Login Nativo en TTY1 ===${NC}"
 # Obtener el usuario real que lanzó sudo
 LOGGED_USER=$(logname || echo $USER)
