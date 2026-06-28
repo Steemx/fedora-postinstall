@@ -179,7 +179,7 @@ export QT_QPA_PLATFORM=wayland
 niri-session || bash 
 fi 
 EOF 
-chown $REAL_USER:$REAL_USER "$USER_HOME/.bash_profile
+chown $REAL_USER:$REAL_USER "$USER_HOME/.bash_profile"
 
 # --- COMPROBACIONES DE HARDWARE (MUESTRAN EL ESTADO REAL EN EL LOG) ---
 echo -e "${ANUNCIAR}=== Ejecutando Comprobaciones y Dracut ===${NC}"
