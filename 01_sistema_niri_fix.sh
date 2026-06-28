@@ -116,6 +116,7 @@ EOF
 # Limpieza preventiva por si quedó rastro de configuraciones fallidas previas
 rm -f /etc/sddm.conf.d/wayland.conf
 
+echo "set linenumbers" >> ~/.nanorc
 systemctl set-default graphical.target
 systemctl disable gdm.service 2>/dev/null || true
 systemctl disable lightdm.service 2>/dev/null || true
