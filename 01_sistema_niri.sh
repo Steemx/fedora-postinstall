@@ -69,6 +69,9 @@ echo "priority=1" | tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalt
 # Instalación pura del entorno sin ningún Display Manager intermediario
 /usr/bin/dnf install -y niri noctalia-git
 
+# Lineas numeradas nano
+echo "set linenumbers" >> ~/.nanorc
+
 /usr/bin/dnf install -y \
     qt6-qtwayland wayland-protocols \
     xdg-desktop-portal-gnome xdg-desktop-portal-gtk \
