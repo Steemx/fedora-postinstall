@@ -170,7 +170,17 @@ options i915 enable_guc=2
 options i915 enable_fbc=1
 options i915 modeset=1
 EOF
-log_status $? "Configuración Intel GuC/HuC"
+
+# FIX: Forzar cursor visible por software en SDDM (Evita cursor invisible en Intel/X11)
+mkdir -p /etc/X11/xorg.conf.d
+cat << 'EOF' > /etc/X11/xorg.conf.d/20-intel.conf
+Section "Device"
+    Identifier "Intel Graphics"
+    Driver     "intel"
+    Option     "SWcursor" "on"
+EndSection
+EOF
+log_status $? "Configuración Intel GuC/HuC y Fix de Cursor Visible"
 
 echo -e "${ANUNCIAR}=== 11. Configurando Distribución de Teclado y Entorno ===${NC}"
 if [ -f /etc/environment ]; then
