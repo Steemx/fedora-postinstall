@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (UNIFICADO - Sin LABWC)
+# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (UNIFICADO - Niri/noctalia-git
 # ==============================================================================
 
 # Colores para la terminal
