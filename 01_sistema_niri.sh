@@ -39,7 +39,7 @@ echo -e "${ANUNCIAR}=== 2. Actualizando el Sistema Base ===${NC}"
 log_status $? "Actualización del sistema"
 
 echo -e "${ANUNCIAR}=== 3. Habilitando Repositorios Clave y Códecs ===${NC}"
-# TU COMANDO ORIGINAL E INDESTRUCTIBLE
+# TU COMANDO ORIGINAL EXACTO, LITERAL Y SIN ESCAPES RAROS
 /usr/bin/dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 /usr/bin/dnf upgrade -y --refresh
 /usr/bin/dnf group install "Multimedia" -y
