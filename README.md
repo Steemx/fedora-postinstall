@@ -13,7 +13,7 @@ Para lxqt
 
 curl -sSL https://raw.githubusercontent.com/Steemx/fedora-postinstall/main/fedora-postinstall-lxqt.sh | sudo bash
 
-
+sudo ./01_sistema_niri.sh 2>&1 | tee -a ~/fedora_sistema_completo.log
 
 Tambien sirve:
 
