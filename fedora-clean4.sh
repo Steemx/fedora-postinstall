@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (NIRI + NOCTALIA + SDDM)
+# SCRIPT DE POST-INSTALACIÓN PARA FEDORA LINUX (NIRI + NOCTALIA + SDDM) gemini
 # ==============================================================================
 
 # Forzar la salida si ocurre un error en comandos críticos
