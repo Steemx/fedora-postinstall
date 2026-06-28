@@ -182,6 +182,31 @@ EOF
 
 # 3. Borrar el archivo de Intel anterior para no generar conflictos raros
 sudo rm -f /etc/X11/xorg.conf.d/20-intel.conf
+# ... (todo lo anterior de la sección 6 igual)
+
+mkdir -p /usr/share/wayland-sessions
+cat << 'EOF' > /usr/share/wayland-sessions/niri.desktop
+[Desktop Entry]
+Name=Niri (Git)
+Comment=A scrollable tiling Wayland compositor (Development Branch)
+Exec=niri-session
+Type=Application
+DesktopNames=niri
+EOF
+
+# FIX DEFINITIVO: Script Xsetup para forzar el renderizado del mouse en X11
+mkdir -p /usr/share/sddm/scripts
+cat << 'EOF' > /usr/share/sddm/scripts/Xsetup
+#!/bin/sh
+xsetroot -cursor_name left_ptr
+EOF
+chmod +x /usr/share/sddm/scripts/Xsetup
+
+systemctl set-default graphical.target
+systemctl disable gdm.service 2>/dev/null || true
+systemctl disable lightdm.service 2>/dev/null || true
+systemctl enable --force sddm.service
+log_status $? "Base Niri/Noctalia (Git) y configuración de SDDM con fix xsetroot"
 log_status $? "Configuración Intel GuC/HuC y Fix de Cursor Visible"
 
 echo -e "${ANUNCIAR}=== 11. Configurando Distribución de Teclado y Entorno ===${NC}"
