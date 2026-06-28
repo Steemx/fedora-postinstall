@@ -132,15 +132,11 @@ options i915 modeset=1
 EOF
 log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
-echo -e "${ANUNCIAR}=== 10. Eliminando por completo el Firewall (Firewalld) ===${NC}"
-/usr/bin/systemctl stop firewalld.service 2>/dev/null || true
-/usr/bin/dnf remove -y firewalld
-if ! grep -q "exclude=" /etc/dnf/dnf.conf; then
-    echo "exclude=firewalld" >> /etc/dnf/dnf.conf
-else
-    sed -i 's/exclude=/exclude=firewalld,/g' /etc/dnf/dnf.conf
-fi
-log_status $? "Eliminación completa y bloqueo de firewalld"
+echo -e "${ANUNCIAR}=== 10. Agregando kdeconnect al Firewall (Firewalld) ===${NC}"
+if /usr/bin/rpm -q firewalld &>/dev/null; then 
+firewall-cmd --permanent --add-service=kdeconnect 
+firewall-cmd --reload 
+fi 
 
 # Configurar el teclado latinoamericano de forma global nativa
 if [ -f /etc/environment ]; then
