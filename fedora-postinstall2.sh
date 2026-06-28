@@ -66,7 +66,7 @@ echo "== 5a. Instalando nwg-look =="
 log_status $? "Herramientas de compresión y utilidades"
 
 echo "== 5b. Instalando base gnome =="
-/usr/bin/dnf -y install gdm gnome-session thunar gvfs tumbler thunar-volman kitty
+/usr/bin/dnf -y install gdm gnome-session thunar gvfs tumbler thunar-volman kitty cpupower gamemode
 log_status $? "Base gnome y thunar"
 
 echo "=== 6. Instalando fuentes del sistema y temas ==="
