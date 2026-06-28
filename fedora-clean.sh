@@ -58,16 +58,27 @@ echo "=== 4. Actualizando el sistema base ==="
 log_status $? "Actualización del sistema base"
 
 echo "=== 5. Instalando herramientas de compresión y utilidades ==="
-/usr/bin/dnf -y install xz bzip2 unrar p7zip wl-clipboard xclip lbzip2 lzma arj lzop niri kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
-echo "== 5a. Instalando nwg-look =="
-/usr/bin/dnf copr enable solopasha/hyprland -y && sudo dnf install nwg-look -y
-/usr/bin/dnf copr disable solopasha/hyprland -y
-/usr/bin/dnf copr enable lionheartp/Hyprland -y && sudo dnf install noctalia-git noctalia-greeter 
+/usr/bin/dnf -y install xz bzip2 unrar p7zip wl-clipboard xclip lbzip2 lzma arj lzop kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
 log_status $? "Herramientas de compresión y utilidades"
 
-echo "== 5b. Instalando base gnome =="
-/usr/bin/dnf -y install gdm gnome-session thunar gvfs tumbler thunar-volman kitty cpupower gamemode
-log_status $? "Base gnome y thunar"
+echo "== 5b. Instalando base  =="
+# Habilitar repositorios Git
+/usr/bin/dnf copr enable yalter/niri-git -y
+/usr/bin/dnf copr enable lionheartp/Hyprland -y
+echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalter:niri-git.repo
+/usr/bin/dnf install niri noctalia-git
+
+# Instalar todo el stack
+/usr/bin/dnf install \
+  gdm \
+  qt6-qtwayland wayland-protocols \
+  xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
+  pipewire pipewire-pulse wireplumber \
+  kitty thunar wl-clipboard \
+  fira-code-fonts google-noto-sans-fonts \
+  cpupower gamemode \
+  -y
+log_status $? "Base"
 
 echo "=== 6. Instalando fuentes del sistema y temas ==="
 /usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts rsms-inter-vf-fonts qt6ct qt5ct papirus-icon-theme kvantum xdg-desktop-portal-kde
@@ -119,8 +130,6 @@ options i915 enable_guc=2
 options i915 enable_fbc=1
 options i915 modeset=1
 EOF
-#echo "Generando initramfs con Dracut..."
-#/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 log_status $? "Configuración Intel GuC/HuC (GUC=3) y Dracut"
 
 echo "=== 10. Eliminando por completo el Firewall (Firewalld) ==="
@@ -144,48 +153,7 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
-# 3. Forzar el mapa de teclado en el archivo de sesión de LXQt del usuario
-#LXQT_SESSION_CONF="$USER_HOME/.config/lxqt/session.conf"
-#sudo -u $REAL_USER mkdir -p "$(dirname "$LXQT_SESSION_CONF")"
-#if [ -f "$LXQT_SESSION_CONF" ]; then
-#    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_LAYOUT/d' "$LXQT_SESSION_CONF"
-#    sudo -u $REAL_USER sed -i '/XKB_DEFAULT_MODEL/d' "$LXQT_SESSION_CONF"
-#fi
-#sudo -u $REAL_USER cat << 'EOF' >> "$LXQT_SESSION_CONF"
-
-#[Environment]
-#XKB_DEFAULT_LAYOUT=latam
-#XKB_DEFAULT_MODEL=pc105
-#EOF
-#log_status $? "Configuración de teclado Latam"
-
-#echo "=== 12. Configurando Temas para Aplicaciones Flatpak ==="
-#/usr/bin/flatpak override --system --filesystem=$USER_HOME/.themes
-# CORREGIDO: "Numix" con N mayúscula para coincidir exactamente con el nombre de la carpeta del sistema
-#/usr/bin/flatpak override --system --env=GTK_THEME=Numix
-#/usr/bin/flatpak override --system --filesystem=xdg-config/gtk-3.0:ro --filesystem=xdg-config/gtk-4.0:ro --filesystem=/usr/share/themes:ro
-#log_status $? "Overrides de temas para Flatpak"
-
-#echo "=== 13. Configurando Soporte Completo para Bluetooth ==="
-# 1. Instalar servicio de Bluetooth y la bandeja del sistema (Blueman)
-#/usr/bin/dnf install -y bluez bluez-utils blueman
-# 2. Habilitar y arrancar el servicio nativo
-#/usr/bin/systemctl enable bluetooth.service
-#/usr/bin/systemctl start bluetooth.service
-# 3. Lanzamiento automático en el inicio del entorno
-#sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
-#sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/blueman-applet.desktop
-#[Desktop Entry]
-#Type=Application
-#Name=Blueman Applet
-#Icon=blueman
-#Exec=blueman-applet
-#Terminal=false
-#Categories=Network;HardwareSettings;
-#EOF
-#log_status $? "Configuración e inicio automático de Bluetooth (Blueman)"
-
-echo "=== 14. Instalando Programas del Sistema (DNF) ==="
+echo "=== 11. Instalando Programas del Sistema (DNF) ==="
 /usr/bin/dnf install -y --setopt=install_weak_deps=False steam kde-connect firefox
 if [ $? -eq 0 ] || /usr/bin/rpm -q steam &>/dev/null; then
   log_status 0 "Instalación de programas DNF (Steam, KDE Connect, Firefox)"
@@ -196,6 +164,7 @@ fi
 echo "=== 15. Instalando Aplicaciones Flatpak ==="
 /usr/bin/flatpak update --appstream -y
 /usr/bin/flatpak install --system -y flathub com.discordapp.Discord \
+                                                              com.vysp3r.ProtonPlus \
                                                               com.github.tchx84.Flatseal \
                                                               io.github.flattool.Warehouse \
                                                               org.telegram.desktop \
@@ -207,7 +176,7 @@ else
 fi
 
 
-echo "=== 17. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
+echo "=== 12. Configurando aplicaciones en Inicio Automático (Minimizadas) ==="
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/autostart
 
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop
@@ -218,16 +187,6 @@ Exec=kdeconnect-indicator
 Icon=kdeconnect
 Terminal=false
 Categories=Network;
-EOF
-
-sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/com.discordapp.Discord.desktop
-[Desktop Entry]
-Type=Application
-Name=Discord
-Exec=sh -c "sleep 40 && /usr/bin/flatpak run com.discordapp.Discord --start-minimized"
-Icon=com.discordapp.Discord
-Terminal=false
-Categories=Network;InstantMessaging;
 EOF
 
 sudo -u $REAL_USER cat << 'EOF' > $USER_HOME/.config/autostart/org.telegram.desktop.desktop
@@ -241,35 +200,22 @@ Categories=Network;InstantMessaging;
 EOF
 log_status $? "Configuración de inicio automático minimizado"
 
-echo "=== 17a. Configurando entorno Qt ==="
+echo "=== 12a. Configurando entorno Qt ==="
 sudo -u "$REAL_USER" mkdir -p "$USER_HOME/.config/environment.d"
 
-cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/environment.d/qt.conf" > /dev/null
-QT_QPA_PLATFORMTHEME=qt6ct
-QT_STYLE_OVERRIDE=Fusion
-GTK_USE_PORTAL=1
-XDG_CURRENT_DESKTOP=niri
-KDE_SESSION_TYPE=wayland
-ELECTRON_OZONE_PLATFORM_HINT=wayland
-EOF
-log_status $? "override de entorno y theme"
-
-echo "=== 18. Optimizando Tiempos de Arranque Final ==="
+echo "=== 13. Optimizando Tiempos de Arranque Final ==="
 /usr/bin/systemctl disable NetworkManager-wait-online.service
 /usr/bin/systemctl enable fstrim.timer
 /usr/bin/systemctl enable --now power-profiles-daemon
 log_status $? "Optimización de arranque final y fstrim"
 
-echo "=== 19. Limpiando archivos temporales y caché ==="
+echo "=== 14. Limpiando archivos temporales y caché ==="
 /usr/bin/dnf clean all
 /usr/bin/flatpak uninstall --unused -y
 log_status $? "Limpieza del sistema"
 
-echo "=== 20. Generando pantalla de reporte para el próximo inicio ==="
+echo "=== 15. Generando pantalla de reporte para el próximo inicio ==="
 /usr/bin/update-desktop-database /var/lib/flatpak/exports/share/applications &>/dev/null
-
-#echo "Generando initramfs con Dracut..."
-#/usr/sbin/dracut --force || { echo "❌ Error crítico en dracut."; log_status 1 "Generación de Dracut"; exit 1; }
 
 SCRIPT_LOG_VIEWER="$USER_HOME/.show_install_log.sh"
 sudo -u $REAL_USER cat << EOF > "$SCRIPT_LOG_VIEWER"
