@@ -67,19 +67,19 @@ echo "=== 5. Instalando herramientas de compresión y utilidades ==="
 log_status $? "Herramientas de compresión y utilidades"
 
 # ==============================================================================
-echo "=== 5b. Instalando base Niri/Noctalia ==="
+echo "== 5b. Instalando base =="
 
 # Habilitar repositorios Git
 /usr/bin/dnf copr enable yalter/niri-git -y
 /usr/bin/dnf copr enable lionheartp/Hyprland -y
 echo "priority=1" | tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalter:niri-git.repo
 
-# Instalar Niri y Noctalia (CORREGIDO: noctalia-git, no noctalia-shell)
+# Instalar Niri y Noctalia
 /usr/bin/dnf install -y niri noctalia-git
 
-# Stack complementario
+# Instalar todo el stack (CORREGIDO: SDDM en lugar de GDM)
 /usr/bin/dnf install -y \
-    gdm \
+    sddm \
     qt6-qtwayland wayland-protocols \
     xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
     pipewire pipewire-pulse wireplumber \
@@ -88,16 +88,14 @@ echo "priority=1" | tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalt
     kernel-tools gamemode
 
 # Gestor de pantallas (SERVICIO DEL SISTEMA)
-systemctl enable gdm
+systemctl enable sddm
 
-# Audio y portales (SERVICIOS DE USUARIO)
+# Audio y portales (a nivel de usuario)
 sudo -u $REAL_USER systemctl --user enable --now pipewire pipewire-pulse wireplumber
 sudo -u $REAL_USER systemctl --user enable --now xdg-desktop-portal-wlr
 
 # Crear configuración de Niri
 sudo -u $REAL_USER mkdir -p $USER_HOME/.config/niri
-
-# Generar config por defecto (ejecutar como usuario, no como root)
 sudo -u $REAL_USER bash -c 'niri validate --print-default-config > $HOME/.config/niri/config.kdl'
 
 # Añadir Noctalia al inicio de Niri
@@ -105,14 +103,14 @@ sudo -u $REAL_USER bash -c '
 if grep -q "spawn-at-startup" $HOME/.config/niri/config.kdl; then
     sed -i "/spawn-at-startup/a\\  spawn-at-startup \"noctalia-shell\"" $HOME/.config/niri/config.kdl
 else
-    echo -e "\nspawn-at-startup \"noctalia-shell\"" >> $HOME/.config/niri/config.kdl
+    echo -e "\nspawn-at-startup \"noctalia\"" >> $HOME/.config/niri/config.kdl
 fi
 '
 
 # Corregir permisos
 chown -R $REAL_USER:$REAL_USER $USER_HOME/.config/niri
 
-log_status $? "Base Niri/Noctalia"
+log_status $? "Base Niri/Noctalia con SDDM"
 
 # ==============================================================================
 echo "=== 6. Instalando fuentes del sistema y temas ==="
