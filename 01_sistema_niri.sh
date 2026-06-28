@@ -163,23 +163,7 @@ echo -e "${ANUNCIAR}=== 13. Limpiando archivos temporales y caché ===${NC}"
 /usr/bin/flatpak uninstall --unused -y
 log_status $? "Limpieza del sistema"
 
-# Configurar el arranque automático de Niri en tu .bash_profile al loguearte en la TTY1
-sed -i '/# Arranque automático de Niri/,+4d' "$USER_HOME/.bash_profile" 2>/dev/null || true
-# Configurar el arranque automático de Niri en tu .bash_profile al loguearte en la TTY1 
-sed -i '/# Arranque automático de Niri/,+7d' "$USER_HOME/.bash_profile" 2>/dev/null || true 
-cat << 'EOF' >> "$USER_HOME/.bash_profile" 
 
-# Arranque automático de Niri nativo desde TTY1 
-if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then 
-# Agregamos variables críticas para que el Celeron levante Wayland y Qt sin colgarse 
-export XDG_SESSION_TYPE=wayland 
-export QT_QPA_PLATFORM=wayland 
-
-# Lanzamos niri-session. Si falla, el "|| bash" te devuelve a la TTY en vez de congelar la pantalla 
-niri-session || bash 
-fi 
-EOF
-chown $REAL_USER:$REAL_USER "$USER_HOME/.bash_profile"
 
 # --- COMPROBACIONES DE HARDWARE (MUESTRAN EL ESTADO REAL EN EL LOG) ---
 echo -e "${ANUNCIAR}=== Ejecutando Comprobaciones y Dracut ===${NC}"
