@@ -52,6 +52,7 @@ EOF
 
 # Aplicar las mismas optimizaciones nativas para DNF5 en Fedora 44
 mkdir -p /etc/dnf
+cat << 'EOF' > /etc/dnf/dn5.conf 2>/dev/null || true
 cat << 'EOF' > /etc/dnf/dnf5.conf
 [main]
 gpgcheck=True
@@ -86,13 +87,13 @@ echo -e "${ANUNCIAR}=== 5. Instalando herramientas de compresión y utilidades e
     fontconfig btop power-profiles-daemon
 log_status $? "Herramientas de compresión y utilidades"
 
-echo -e "${ANUNCIAR}=== 6. Instalando base Niri/Noctalia con SDDM (Backend Wayland) ===${NC}"
+echo -e "${ANUNCIAR}=== 6. Instalando base Niri/Noctalia con SDDM ===${NC}"
 /usr/bin/dnf copr enable yalter/niri-git -y
 /usr/bin/dnf copr enable lionheartp/Hyprland -y
 echo "priority=1" | tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalter:niri-git.repo
 
-# Agregamos weston por seguridad para el backend gráfico de SDDM
-/usr/bin/dnf install -y sddm weston niri noctalia-git
+# Instalación conjunta de SDDM junto al driver de control del mouse para entorno minimal
+/usr/bin/dnf install -y sddm xorg-x11-drv-libinput niri noctalia-git
 
 /usr/bin/dnf install -y \
     qt6-qtwayland wayland-protocols \
@@ -112,22 +113,14 @@ Type=Application
 DesktopNames=niri
 EOF
 
-# Forzar a SDDM a usar Wayland nativo (Soluciona el mouse y teclado congelados)
-mkdir -p /etc/sddm.conf.d
-cat << 'EOF' > /etc/sddm.conf.d/wayland.conf
-[General]
-DisplayServer=wayland
-GreeterEnvironment=QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-
-[Wayland]
-CompositorCommand=weston --shell=fullscreen
-EOF
+# Limpieza preventiva por si quedó rastro de configuraciones fallidas previas
+rm -f /etc/sddm.conf.d/wayland.conf
 
 systemctl set-default graphical.target
 systemctl disable gdm.service 2>/dev/null || true
 systemctl disable lightdm.service 2>/dev/null || true
 systemctl enable --force sddm.service
-log_status $? "Base Niri/Noctalia (Git) y configuración de SDDM en Wayland"
+log_status $? "Base Niri/Noctalia (Git) y configuración de SDDM con drivers de entrada"
 
 echo -e "${ANUNCIAR}=== 7. Instalando fuentes del sistema y temas ===${NC}"
 /usr/bin/dnf install -y \
