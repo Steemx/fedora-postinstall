@@ -69,12 +69,13 @@ echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org
 /usr/bin/dnf install niri noctalia-git
 
 # Instalar todo el stack
-/usr/bin/dnf install gdm qt6-qtwayland wayland-protocols xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
+/usr/bin/dnf install gdm -y 
+/usr/bin/dnf install qt6-qtwayland wayland-protocols xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
 
-  # Gestor de pantallas
-sudo systemctl enable gdm Audio y portales (a nivel de usuario)
-sudo systemctl --user enable --now pipewire pipewire-pulse wireplumber
-sudo systemctl --user enable --now xdg-desktop-portal-wlr
+# Gestor de pantallas
+sudo systemctl enable gdm
+sudo -u $REAL_USER systemctl --user enable --now pipewire pipewire-pulse wireplumber
+sudo -u $REAL_USER systemctl --user enable --now xdg-desktop-portal-wlr
 log_status $? "Base"
 
 echo "=== 6. Instalando fuentes del sistema y temas ==="
