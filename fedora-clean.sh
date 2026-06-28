@@ -69,19 +69,10 @@ echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org
 /usr/bin/dnf install niri noctalia-git
 
 # Instalar todo el stack
-/usr/bin/dnf install \
-  gdm \
-  qt6-qtwayland wayland-protocols \
-  xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
-  pipewire pipewire-pulse wireplumber \
-  kitty thunar wl-clipboard \
-  fira-code-fonts google-noto-sans-fonts \
-  cpupower gamemode \
-  -y
-  # Gestor de pantallas
-systemctl enable gdm
+/usr/bin/dnf install gdm qt6-qtwayland wayland-protocols xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
 
-# Audio y portales (a nivel de usuario)
+  # Gestor de pantallas
+systemctl enable gdm Audio y portales (a nivel de usuario)
 systemctl --user enable --now pipewire pipewire-pulse wireplumber
 systemctl --user enable --now xdg-desktop-portal-wlr
 log_status $? "Base"
