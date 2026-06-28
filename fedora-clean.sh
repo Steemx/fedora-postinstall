@@ -78,6 +78,12 @@ echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org
   fira-code-fonts google-noto-sans-fonts \
   cpupower gamemode \
   -y
+  # Gestor de pantallas
+systemctl enable gdm
+
+# Audio y portales (a nivel de usuario)
+systemctl --user enable --now pipewire pipewire-pulse wireplumber
+systemctl --user enable --now xdg-desktop-portal-wlr
 log_status $? "Base"
 
 echo "=== 6. Instalando fuentes del sistema y temas ==="
