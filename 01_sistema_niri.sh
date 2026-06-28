@@ -178,7 +178,7 @@ export QT_QPA_PLATFORM=wayland
 # Lanzamos niri-session. Si falla, el "|| bash" te devuelve a la TTY en vez de congelar la pantalla 
 niri-session || bash 
 fi 
-EOF 
+EOF
 chown $REAL_USER:$REAL_USER "$USER_HOME/.bash_profile"
 
 # --- COMPROBACIONES DE HARDWARE (MUESTRAN EL ESTADO REAL EN EL LOG) ---
