@@ -88,6 +88,9 @@ echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org
 # Instalar todo el stack gráfico base
 /usr/bin/dnf install qt6-qtwayland wayland-protocols-devel xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
 
+# File picker para thunar
+echo "org.freedesktop.impl.portal.FileChooser=gtk;" > /usr/share/xdg-desktop-portal/niri-portals.conf
+
 systemctl --user --machine="${REAL_USER}@.host" enable pipewire pipewire-pulse wireplumber
 systemctl --user --machine="${REAL_USER}@.host" enable xdg-desktop-portal-wlr
 log_status $? "Base"
