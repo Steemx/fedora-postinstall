@@ -27,3 +27,4 @@ unset rc
 
 export QT_QPA_PLATFORMTHEME=qt6ct
 export QT_QPA_PLATFORM=wayland
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
