@@ -1,0 +1,120 @@
+[audio]
+enable_overdrive = true
+
+[bar.default]
+background_opacity = 0.34999999217689037
+center = [ "media", "clock" ]
+contact_shadow = true
+end = [
+    "tray",
+    "notifications",
+    "clipboard",
+    "network",
+    "bluetooth",
+    "volume",
+    "brightness",
+    "battery",
+    "control-center",
+    "session"
+]
+font_family = "FiraCode Nerd Font Med"
+margin_ends = 50
+
+[location]
+address = "Iquique, Chile"
+
+[lockscreen]
+enabled = false
+
+[lockscreen_widgets]
+enabled = false
+schema_version = 2
+widget_order = [ "lockscreen-login-box@eDP-1" ]
+
+    [lockscreen_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@eDP-1"]
+    box_height = 70.0
+    box_width = 400.0
+    cx = 683.0
+    cy = 649.0
+    output = "eDP-1"
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@eDP-1".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        input_opacity = 1.0
+        input_radius = 6.0
+        show_login_button = true
+
+[plugin_settings."noctalia/wallhaven"]
+download_dir = "Imágenes/wallpapers"
+
+[plugins]
+enabled = [ "noctalia/wallhaven" ]
+
+    [[plugins.source]]
+    kind = "git"
+    location = "https://github.com/noctalia-dev/official-plugins"
+    name = "official"
+
+    [[plugins.source]]
+    kind = "git"
+    location = "https://github.com/noctalia-dev/community-plugins"
+    name = "community"
+
+    [[plugins.source]]
+    auto_update = true
+    kind = "git"
+    location = "https://github.com/olafkfreund/nocatalia-v5-plugins"
+    name = "olafkreund"
+
+[shell]
+app_icon_colorize = true
+font_family = "FiraCode Nerd Font Med"
+polkit_agent = true
+settings_show_advanced = true
+
+    [shell.panel]
+    transparency_mode = "soft"
+
+    [shell.screenshot]
+    directory = "/home/steemx/Imágenes/screenshots"
+
+[theme]
+builtin = "Noctalia"
+community_palette = "Cyberpunk"
+custom_palette = "lofi-cafe1-ts"
+mode = "dark"
+source = "wallpaper"
+wallpaper_scheme = "m3-tonal-spot"
+
+    [theme.templates]
+    builtin_ids = [ "btop", "cava", "gtk3", "gtk4", "kcolorscheme", "kitty", "niri", "qt" ]
+    community_ids = [ "fuzzel", "discord", "papirus-icons", "steam", "telegram" ]
+
+[wallpaper]
+directory = "/home/steemx/Imágenes/wallpapers"
+fill_mode = "fit"
+transition_on_startup = true
+
+    [wallpaper.default]
+    path = "/home/steemx/Imágenes/wallpapers/Lofi-Cafe1.png"
+
+    [wallpaper.last]
+    path = "/home/steemx/Imágenes/wallpapers/Lofi-Cafe1.png"
+
+    [wallpaper.monitors.eDP-1]
+    path = "/home/steemx/Imágenes/wallpapers/Lofi-Cafe1.png"
+
+[widget.clock]
+format = "{:%a %m %b | %H:%M}"
+
+[widget.media]
+hide_when_no_media = true
