@@ -66,7 +66,7 @@ echo -e "${ANUNCIAR}=== 4. Actualizando el sistema base ===${NC}"
 log_status $? "Actualización del sistema base"
 
 echo -e "${ANUNCIAR}=== 5. Instalando herramientas de compresión y utilidades ===${NC}"
-/usr/bin/dnf -y install xz bzip2 unrar p7zip wl-clipboard xclip lbzip2 lzma arj lzop kitty cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
+/usr/bin/dnf -y install xz bzip2 unrar p7zip wl-clipboard xclip lbzip2 lzma arj lzop kitty gvfs-mtp cpio git webp-pixbuf-loader unar file-roller curl cabextract xorg-x11-font-utils fontconfig btop power-profiles-daemon xwayland-satellite
 echo -e "${ANUNCIAR}=== Creando carpetas del Home ===${NC}"
 /usr/bin/dnf install -y xdg-user-dirs
 sudo -u "$REAL_USER" xdg-user-dirs-update
