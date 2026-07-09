@@ -77,17 +77,17 @@ log_status $? "Herramientas de compresión y utilidades"
 echo "set linenumbers" >> "$USER_HOME/.nanorc"
 chown $REAL_USER:$REAL_USER "$USER_HOME/.nanorc"
 
-echo -e "${ANUNCIAR}=== 5b. Instalando base ===${NC}"
-# Habilitar repositorios Git
-/usr/bin/dnf copr enable yalter/niri-git -y
-/usr/bin/dnf copr enable lionheartp/Hyprland -y
-echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalter:niri-git.repo
+# echo -e "${ANUNCIAR}=== 5b. Instalando base ===${NC}"
+# # Habilitar repositorios Git
+# /usr/bin/dnf copr enable yalter/niri-git -y
+# /usr/bin/dnf copr enable lionheartp/Hyprland -y
+# echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalter:niri-git.repo
 
 # Instalar todo el stack gráfico base
 /usr/bin/dnf install qt6-qtwayland wayland-protocols-devel xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
 
 # File picker para thunar
-echo "org.freedesktop.impl.portal.FileChooser=gtk;" > /usr/share/xdg-desktop-portal/niri-portals.conf
+# echo "org.freedesktop.impl.portal.FileChooser=gtk;" > /usr/share/xdg-desktop-portal/niri-portals.conf
 
 systemctl --user --machine="${REAL_USER}@.host" enable pipewire pipewire-pulse wireplumber
 systemctl --user --machine="${REAL_USER}@.host" enable xdg-desktop-portal-wlr
@@ -198,7 +198,7 @@ echo "Proceso finalizado por completo con éxito." >> "$LOG_FILE"
 echo -e "${VERDE}==============================================================================${NC}"
 echo -e "${VERDE} ¡PROCESO COMPLETADO! Todo se ha configurado de manera definitiva.            ${NC}"
 echo -e "${VERDE} El equipo se reiniciará automáticamente en 10 segundos...                     ${NC}"
-echo -e "${VERDE} Al volver te pedirá tu usuario/pass en la TTY y cargará Niri solo.             ${NC}"
+echo -e "${VERDE} Al volver te pedirá tu usuario/pass en la TTY y niri-session para iniciar.             ${NC}"
 echo -e "${VERDE}==============================================================================${NC}"
 sleep 10
 reboot
