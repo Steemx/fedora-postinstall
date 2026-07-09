@@ -44,26 +44,26 @@ log_status $? "Instalación de Steam, KDE Connect y Firefox"
 echo "=== 3. Configurando carpetas de usuario e Inicio Automático ==="
 sudo -u "$REAL_USER" mkdir -p "$USER_HOME/.config/autostart"
 
-cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop" > /dev/null
-[Desktop Entry]
-Type=Application
-Name=KDE Connect Indicator
-Exec=kdeconnect-indicator
-Icon=kdeconnect
-Terminal=false
-Categories=Network;
-EOF
+# cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/autostart/org.kde.kdeconnect.daemon.desktop" > /dev/null
+# [Desktop Entry]
+# Type=Application
+# Name=KDE Connect Indicator
+# Exec=kdeconnect-indicator
+# Icon=kdeconnect
+# Terminal=false
+# Categories=Network;
+# EOF
 
-cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/autostart/org.telegram.desktop.desktop" > /dev/null
-[Desktop Entry]
-Type=Application
-Name=Telegram
-Exec=sh -c "sleep 20 && /usr/bin/flatpak run org.telegram.desktop -startintray"
-Icon=telegram
-Terminal=false
-Categories=Network;InstantMessaging;
-EOF
-log_status $? "Configuración de inicio automático"
+# cat << 'EOF' | sudo -u "$REAL_USER" tee "$USER_HOME/.config/autostart/org.telegram.desktop.desktop" > /dev/null
+# [Desktop Entry]
+# Type=Application
+# Name=Telegram
+# Exec=sh -c "sleep 20 && /usr/bin/flatpak run org.telegram.desktop -startintray"
+# Icon=telegram
+# Terminal=false
+# Categories=Network;InstantMessaging;
+# EOF
+# log_status $? "Configuración de inicio automático"
 
 echo "=== 4. Instalando Aplicaciones Flatpak (Pesadas) ==="
 /usr/bin/flatpak update --appstream -y
