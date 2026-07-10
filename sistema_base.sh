@@ -77,14 +77,8 @@ log_status $? "Herramientas de compresión y utilidades"
 echo "set linenumbers" >> "$USER_HOME/.nanorc"
 chown $REAL_USER:$REAL_USER "$USER_HOME/.nanorc"
 
-# echo -e "${ANUNCIAR}=== 5b. Instalando base ===${NC}"
-# # Habilitar repositorios Git
-# /usr/bin/dnf copr enable yalter/niri-git -y
-# /usr/bin/dnf copr enable lionheartp/Hyprland -y
-# echo "priority=1" | sudo tee -a /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:yalter:niri-git.repo
-
 # Instalar todo el stack gráfico base
-/usr/bin/dnf install qt6-qtwayland wayland-protocols-devel xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
+/usr/bin/dnf install qt6-qtwayland wayland-protocols-devel adw-gtk3-theme xdg-desktop-portal-wlr xdg-desktop-portal-gtk pipewire pipewire-pulse wireplumber kitty thunar wl-clipboard fira-code-fonts google-noto-sans-fonts cpupower gamemode -y
 
 # File picker para thunar
 # echo "org.freedesktop.impl.portal.FileChooser=gtk;" > /usr/share/xdg-desktop-portal/niri-portals.conf
