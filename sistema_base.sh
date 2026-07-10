@@ -148,6 +148,8 @@ XKB_DEFAULT_LAYOUT=latam
 XKB_DEFAULT_MODEL=pc105
 EOF
 
+gsettings set org.gnome.desktop.interface gtk-enable-primary-paste true
+
 echo -e "${ANUNCIAR}=== 11. Configurando entorno Qt ===${NC}"
 sudo -u "$REAL_USER" mkdir -p "$USER_HOME/.config/environment.d"
 log_status $? "Configuración entorno Qt"
