@@ -44,7 +44,7 @@ installonly_limit=3
 clean_requirements_on_remove=True
 best=False
 #skip_if_unavailable=True
-#fastestmirror=True
+fastestmirror=True
 max_parallel_downloads=10
 defaultyes=True
 EOF
@@ -88,7 +88,7 @@ systemctl --user --machine="${REAL_USER}@.host" enable xdg-desktop-portal-wlr
 log_status $? "Base"
 
 echo -e "${ANUNCIAR}=== 6. Instalando fuentes del sistema y temas ===${NC}"
-/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts liberation-fonts fira-code-fonts rsms-inter-fonts rsms-inter-vf-fonts qt6ct qt5ct papirus-icon-theme kvantum xdg-desktop-portal-kde
+/usr/bin/dnf install -y google-noto-sans-fonts google-noto-serif-fonts google-noto-color-emoji-fonts google-noto-emoji-fonts liberation-fonts fira-code-fonts rsms-inter-fonts rsms-inter-vf-fonts qt6ct qt5ct papirus-icon-theme kvantum xdg-desktop-portal-kde
 log_status $? "Fuentes del sistema"
 
 echo -e "${ANUNCIAR}=== 7. Configurando Códecs y Multimedia Avanzada ===${NC}"
